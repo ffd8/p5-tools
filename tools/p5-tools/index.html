@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>P5LIVE – sketch</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+			background:#000;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+<script type="text/javascript">
+
+var credits = {
+	"names" : "<a href='http://blah.org'>first.lastname</a> + first.lastname"
+	,"class" : "MDes"
+	,"description" : "here is some really long text describing the tool that i made.. which is awesome! yeah, you know it! Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+}
+
+function saveFrame(toolName){
+	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+	let filename = toolName + '_' + timestamp + '.png';
+	// filename = toolName + '.png'; // uncomment to remove timestamp from name
+	save(filename);
+}
+
+
+
+
+//sketch_20191208165230
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	rectMode(CENTER);
+	fill(255);
+	stroke(0);
+	strokeWeight(2)
+	textSize(height/8);
+	textAlign(CENTER, CENTER);
+	textFont('roboto mono');
+	angleMode(DEGREES);
+	background(0);
+}
+
+function draw() {
+	//textSize(noise(frameCount*.001)*height/4);
+	push();
+	textSize(20+abs(sin(frameCount*0.1))*height/4)
+	translate(width / 2, height / 2);
+	rotate(frameCount / 2);
+	//let offx = abs(sin(frameCount*.12))*height/2;//noise(frameCount*.0012)*200;
+	text("p5-tools", 0, 0, width, height);
+	pop();
+
+	push();
+	textAlign(LEFT, TOP)
+	rectMode(CORNER)
+	textSize(20)
+	text("Welcome to P5-TOOLS!\nblah blah blah intro here...", 10, 60, width/4, height/4);
+	pop();
+
+}
+
+
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

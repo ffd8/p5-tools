@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>P5-TOOLS</title>
+
+	<style type="text/css">
+		:root {
+		  --a: #aaa;
+		  --b: #fff;
+		}
+		@font-face {
+			font-family: 'roboto_mono';
+			src: url('includes/fonts/robotomono-regular-webfont.woff2') format('woff2'),
+			url('includes/fonts/robotomono-regular-webfont.woff') format('woff');
+			font-weight: 400;
+			font-style: normal;
+		}
+		@font-face {
+			font-family: 'roboto_mono';
+			src: url('includes/fonts/robotomono-light-webfont.woff2') format('woff2'),
+			url('includes/fonts/robotomono-light-webfont.woff') format('woff');
+			font-weight: 200;
+			font-style: normal;
+		}
+		body{
+			font-family:'roboto_mono', monospace;
+			font-weight:400;
+			margin:0;
+			width:100vw;
+			height:100vh;
+			overflow:hidden;
+		}
+		div{
+			box-sizing: border-box;
+		}
+		h2, h6{
+			margin:0;
+			margin-bottom:5px;
+		}
+		a{
+			color:var(--a);
+		}
+		#header{
+			position:fixed;
+			top:0;
+			left:0;
+			height:40px;
+			width:100vw;
+			z-index:99;
+			padding:2px;
+			/*border-bottom:1px solid #222;*/
+		}
+		#p5-frame{
+			position:fixed;
+			top:0;
+			left:0;
+			width:100vw;
+			height:100vh;
+			border:none;
+		}
+		.nav{
+			font-family:'roboto_mono', monospace;
+			font-weight:400;
+			font-size:2vh;
+			width:auto;
+			height:90%;
+			border:none;
+			outline:none;
+			border:1px solid var(--a);
+			background:none;
+			color:var(--a);
+			margin:2px;
+			border-radius: 5px;
+			cursor:pointer;
+		}
+		.nav:hover{
+			background:var(--a);
+			color:var(--b);
+		}
+		.btn{
+			width:auto;
+		}
+
+		.vex.vex-theme-plain{
+			padding-top:10vh !important;
+		}
+		.vex-dialog-message{
+			border-bottom:1px solid #aaa;
+			max-height:70vh;
+			overflow-y:auto;
+			padding-bottom:10px;
+		}
+		.vex hr{
+			border:none;
+			border-bottom:1px solid #aaa;
+		}
+		.vex{
+			overflow:hidden !important;
+		}
+	</style>
+</head>
+<body>
+	<div id="header">
+		<select id="tool-select" class="nav" onchange="selectTool(this.value);">
+			<option value="p5-tools">P5-TOOLS</option>
+			<option disabled value>----------------</option>
+			  <!-- <optgroup label="Swedish Cars"></optgroup> -->
+		</select>
+		<button id="btn-about" class="nav btn" onclick="aboutTool()">ABOUT TOOL</button>
+		<button id="btn-save" class="nav btn" onclick="save()">SAVE IMAGE</button>
+	</div>
+	<iframe src="tools/tool2" id="p5-frame" onload="updateColors()"></iframe>
+
+
+	<link rel="stylesheet" href="includes/js/vex/css/vex.css" />
+	<link rel="stylesheet" href="includes/js/vex/css/vex-theme-plain.css" />
+	<script src="includes/js/vex/js/vex.combined.min.js"></script>
+
+	<script type="text/javascript">
+		/*
+			TODO:
+				- check if background needs to be updated more than once??
+				- 
+
+		 */
+
+		let tools = [
+			'tool1'
+			,'tool2'
+		];
+
+		let p5frame = document.getElementById('p5-frame');
+		let p5f = p5frame.contentWindow;
+		let p5select = document.getElementById('tool-select');
+		let curTool = p5select.value;
+		let root = document.documentElement;
+		let introName = 'p5-tools';
+		vex.defaultOptions.className = 'vex-theme-plain'
+
+		// populate select w/ tools
+		for(let tool of tools){
+			p5select.add(new Option(tool, tool));
+		}
+
+		// load tool if in URL
+		if(window.location.hash){
+			curTool = window.location.hash.substring(1);
+			selectTool(curTool);
+			p5select.value = curTool;
+		}else{
+			curTool = introName;
+			selectTool(curTool);
+		}
+
+		// set tool
+		function selectTool(selTool){
+			p5frame.src = 'tools/'+selTool+'/?'+Math.floor(Math.random()*99999);
+			if(selTool == introName){
+				location.replace('#');
+			} else {
+				location.replace("#"+selTool);
+			}
+			curTool = selTool;
+		}
+
+		function updateColors(){
+			let tempSrc = p5f.setup.toString() +'\n'+ p5f.draw.toString();
+			let tempCol = checkBackground(tempSrc);
+			let invertCol = invertHex(tempCol);
+			root.style.setProperty('--a', "#"+invertCol);
+			root.style.setProperty('--b', "#"+tempCol);
+		}
+
+
+		// fancy background magic to change nav colors
+		function checkBackground(txt){
+			var bgReg = /background\(([^)]+)\)/;
+			var nonComments = txt;
+			nonComments = nonComments.replace(/\s*\/\/.*\n/g, '\n').replace(/\s*\/\*[\s\S]*?\*\//g, '');
+			var bgMatches = bgReg.exec(nonComments);
+			if(bgMatches != null){
+				var newBG = '';
+				if(bgMatches[1].includes('#')){
+					newBG = bgMatches[1].replace(/["']/g, '');
+				}else{
+					var cols = bgMatches[1].split(',');
+					if(cols.length > 2){
+						newBG = rgb2hex(cols[0].trim(), cols[1].trim(), cols[2].trim());
+					}else{
+						newBG = rgb2hex(cols[0].trim(), cols[0].trim(), cols[0].trim())
+					}
+				}
+				// document.body.style.background = newBG;
+				//p5frame.style.background = newBG;
+				return newBG;
+			}
+		}
+
+		function rgb2hex(red, green, blue) {
+			var rgb = blue | (green << 8) | (red << 16);
+			return (0x1000000 + rgb).toString(16).slice(1)
+		}
+
+		// https://stackoverflow.com/a/54569758/10885535
+		function invertHex(hex) {
+			return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
+		}
+
+
+
+		// about tool
+		function aboutTool(){
+			let tempAbout = p5f.credits;//p5f.aboutTool.toString();
+			vex.dialog.alert({
+                             focusFirstInput : false,
+				unsafeMessage:
+					'<h2>'+curTool+'</h2>'
+					+'<h6>'+tempAbout.names +'<br>'+tempAbout.class+'</h6><hr>'
+					+tempAbout.description+'<br>'
+					// +tempAbout.names+'<br>'
+					// +tempAbout.class+'<br><br>'
+
+					,
+			})
+			console.log(tempAbout);
+		}
+
+		// save output of tool
+		function save(){
+			p5f.saveFrame(curTool);
+		}
+	</script>
+</body>
+</html>
