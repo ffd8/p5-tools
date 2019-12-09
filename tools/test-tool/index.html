@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TEST</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+			background:#000;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+<script type="text/javascript">
+
+var credits = {
+	"names" : [
+		"first.lastname" // link to website if you have it <a href="URL" target="_blank">first.lastname</a>
+		,"first.lastname"
+	]
+	,"class" : "MA / MDes"
+	,"description" : "Your description here"
+}
+
+function saveFrame(toolName){
+	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+	let filename = toolName + '_' + timestamp + '.png';
+	// filename = toolName + '.png'; // uncomment to remove timestamp from name
+	save(filename);
+}
+
+
+
+
+//sketch_20191208165230
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	rectMode(CENTER);
+	fill(255);
+	background(0);
+	textSize(100)
+	textAlign(CENTER, CENTER)
+	translate(width / 2, height / 2);
+	text("this is just a test.. \nreplace me!", 0, 0, width, height);
+	noLoop();
+}
+
+function draw() {
+	
+}
+
+
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+</script>
+
+</head>
+<body>
+
+</body>
+</html>
