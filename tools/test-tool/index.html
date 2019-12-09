@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>TEST</title>
+	<title>P5LIVE – sketch</title>
 	<meta charset="utf-8">
 	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
 	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
@@ -24,46 +24,52 @@
 		}
 	</style>
 <script type="text/javascript">
+	var credits = {
+		"names" : [
+			"first.lastname" // link to website if you have it <a href="URL" target="_blank">first.lastname</a>
+			,"first.lastname"
+		]
+		,"class" : "MA / MDes"
+		,"description" : "Your description goes here...."
+	}
 
-var credits = {
-	"names" : [
-		"first.lastname" // link to website if you have it <a href="URL" target="_blank">first.lastname</a>
-		,"first.lastname"
-	]
-	,"class" : "MA / MDes"
-	,"description" : "Your description here"
-}
-
-function saveFrame(toolName){
-	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
-	let filename = toolName + '_' + timestamp + '.png';
-	// filename = toolName + '.png'; // uncomment to remove timestamp from name
-	save(filename);
-}
-
+	function saveFrame(toolName){
+		let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+		let filename = toolName + '_' + timestamp + '.png';
+		// filename = toolName + '.png'; // uncomment to remove timestamp from name
+		save(filename);
+	}
 
 
 
-//sketch_20191208165230
+let layer3d;
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
-	rectMode(CENTER);
-	fill(255);
-	background(0);
-	textSize(100)
-	textAlign(CENTER, CENTER)
-	translate(width / 2, height / 2);
-	text("this is just a test.. \nreplace me!", 0, 0, width, height);
-	noLoop();
+	layer3d = createGraphics(width, height, WEBGL); // 3d space layer
+	layer3d.angleMode(DEGREES); // adjust angleMode of the layer
 }
 
 function draw() {
+	background(frameCount%255, 0, 255, 10);
+	
+	textSize(200);
+	fill(frameCount%255);
+	text("i'm a template..\nreplace index.html!", 0, 0, width, height);
+	
+	layer3d.clear(); // clear the layer
+	layer3d.push(); 
+	layer3d.noStroke();
+	layer3d.lights();
+	layer3d.fill(255, 0, frameCount%255, 150)
+	layer3d.rotateY(frameCount/2)
+	layer3d.rotateX(frameCount/3)
+	layer3d.torus(layer3d.height/4, layer3d.height/10, 5, 5);
+	layer3d.pop();
+	
+	image(layer3d, 0, 0); // SHOW the layer
 	
 }
-
-
-
 
 /* CUSTOM FUNCTIONS FOR P5LIVE */
 // keep fullscreen if window resized
@@ -78,6 +84,12 @@ function ease(iVal, oVal, eVal){
 	return oVal += dx * eVal;
 }
 
+function saveFrame(toolName){
+	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+	let filename = toolName + '_' + timestamp + '.png';
+	// filename = toolName + '.png'; // uncomment to remove timestamp from name
+	save(filename);
+}
 </script>
 
 </head>
