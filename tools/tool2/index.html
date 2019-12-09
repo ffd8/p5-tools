@@ -19,6 +19,21 @@
 		}
 	</style>
 <script type="text/javascript">
+	var credits = {
+		"names" : "<a href='http://blah.org'>first.lastname</a> + first.lastname"
+		,"class" : "MA / MDes"
+		,"description" : "here is some really long text describing the tool that i made.. which is awesome! yeah, you know it! Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+	}
+
+	function saveFrame(toolName){
+		let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+		let filename = toolName + '_' + timestamp + '.png';
+		// filename = toolName + '.png'; // uncomment to remove timestamp from name
+		save(filename);
+	}
+
+
+	
 //3dlayer - 2dworld - ma
 
 let layer3d;

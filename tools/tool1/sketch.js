@@ -8,7 +8,7 @@ function setup() {
 }
 
 function draw() {
-	background(0, 0, 255);
+	background(255, 255, 0);
 	
 	orbitControl(5)
 	// layer2d.clear();
