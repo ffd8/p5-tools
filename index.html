@@ -37,6 +37,7 @@
 		h2, h6{
 			margin:0;
 			margin-bottom:5px;
+			/*text-transform: uppercase;*/
 		}
 		a{
 			color:var(--a);
@@ -110,10 +111,10 @@
 			<option disabled value>----------------</option>
 			  <!-- <optgroup label="Swedish Cars"></optgroup> -->
 		</select>
-		<button id="btn-about" class="nav btn" onclick="aboutTool()">ABOUT TOOL</button>
+		<button id="btn-about" class="nav btn" onclick="aboutTool()">TOOL INFO</button>
 		<button id="btn-save" class="nav btn" onclick="save()">SAVE IMAGE</button>
 	</div>
-	<iframe src="tools/tool2" id="p5-frame" onload="updateColors()"></iframe>
+	<iframe src="tools/p5-tool" id="p5-frame" onload="updateColors()"></iframe>
 
 
 	<link rel="stylesheet" href="includes/js/vex/css/vex.css" />
@@ -129,7 +130,8 @@
 		 */
 
 		let tools = [
-			'test-tool'
+			'Test-Tool'
+			,
 		];
 
 		let p5frame = document.getElementById('p5-frame');
@@ -137,8 +139,20 @@
 		let p5select = document.getElementById('tool-select');
 		let curTool = p5select.value;
 		let root = document.documentElement;
-		let introName = 'p5-tools';
+		let introName = 'P5-TOOLS';
 		vex.defaultOptions.className = 'vex-theme-plain'
+
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			if(p5f != undefined && p5f.credits != undefined){
+				p5f.noLoop()
+			}
+		}
+		window.onfocus = function () {
+			if(p5f != undefined && p5f.credits != undefined){
+				p5f.loop();
+			}
+		}
 
 		// populate select w/ tools
 		for(let tool of tools){
@@ -157,7 +171,7 @@
 
 		// set tool
 		function selectTool(selTool){
-			p5frame.src = 'tools/'+selTool+'/?'+Math.floor(Math.random()*99999);
+			p5frame.src = 'tools/'+selTool.toLowerCase()+'/?'+Math.floor(Math.random()*99999);
 			if(selTool == introName){
 				location.replace('#');
 			} else {

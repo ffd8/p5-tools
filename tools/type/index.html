@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>textToPoints</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	
+<script type="text/javascript">
+
+	var credits = {
+		"names" : [
+			"first.lastname" // link to website if you have it <a href="URL" target="_blank">first.lastname</a>
+			,"first.lastname"
+		]
+		,"class" : "MA / MDes"
+		,"description" : "Your description goes here...."
+	}
+
+	function saveFrame(toolName){
+		let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+		let filename = toolName + '_' + timestamp + '.png';
+		// filename = toolName + '.png'; // uncomment to remove timestamp from name
+		save(filename);
+	}
+
+//textToPoints
+
+/*	textToPoints // cc teddavis.org 2019	*/
+
+var font, myText = "P5-TOOLS";
+var points = [];
+
+// function preload() {
+// 	font = loadFont('includes/fonts/RobotoMono-Regular.ttf');
+// }
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	stroke(255);
+	font = loadFont('data/RobotoMono-Regular.ttf', getPoints);
+	//getPoints();
+	rectMode(CENTER);
+}
+
+function draw() {
+	background(0);
+	translate(width / 4, height * .7);
+	for(var i = 0; i < points.length; i++) {
+		var pt = points[i];
+		push();
+		translate(pt.x, pt.y);
+		rotate(radians(sin(frameCount * i * 0.00003) * 180));
+		var w = dist(mouseX, mouseY, pt.x + width / 4, pt.y + height * .7) / 3;
+		line(0, 0, w, w);
+		pop();
+	}
+}
+
+function getPoints() {
+	var s = width / myText.length;
+	points = font.textToPoints(myText, 0, 0, s);
+	textFont(font);
+
+}
+
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

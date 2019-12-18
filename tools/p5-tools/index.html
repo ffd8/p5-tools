@@ -1,85 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>P5LIVE – sketch</title>
+	<title>p5-tools intro</title>
 	<meta charset="utf-8">
 	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
 	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
 	<style type="text/css">
-		body{
-			margin:0;
-			overflow:hidden;
-			background:#000;
-		}
-		canvas{
-			position:fixed;
-			top:0;
-			left:0;
-			z-index:-1;
-			width:100vw;
-			height:100vh;
-			margin:0;
-		}
+		
 	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
 <script type="text/javascript">
-
+//p5-tools intro
+//
 var credits = {
 	"names" : [
-		"first.lastname" // link to website if you have it <a href="URL" target="_blank">first.lastname</a>
-		,"first.lastname"
+		"Lecturer: <a href='https://teddavis.org' target='_blank'>Ted Davis</a><br><a href='http://thebaselschoolofdesign.ch' target='_blank'>The Basel School of Design</a>, HGK FHNW"
 	]
-	,"class" : "MA / MDes"
-	,"description" : "here is some really long text describing the tool that i made.. which is awesome! yeah, you know it! Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+	,"class" : ""
+	,"description" : "In this course we explored generative design + creative-coding using <a href='https://p5js.org'>p5.js</a> via <a href='https://p5live.org' target='_blank'>P5LIVE</a>. <br><br>Once dangerous, we began developing custom tools using the DOM elements (sliders, buttons, checkboxes) to change variables throughout the code.<br><br>When creating your own tools, the possibilities of digital design becomes endless. Enjoy exploring these tools."
 }
 
 function saveFrame(toolName){
 	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
 	let filename = toolName + '_' + timestamp + '.png';
-	// filename = toolName + '.png'; // uncomment to remove timestamp from name
 	save(filename);
 }
 
+let font, points, bounds;
 
+let m = {
+	rot:0
+}
 
+let sGap = 35;
+let s = [
+	{name:"trace", min:0, max:255, def:200, step:1}
+	,{name:"scale", min:0.1, max:15.0, def:.7, step:.001}
+	,{name:"rot", min:-2, max:2, def:0, step:.1}
+	,{name:"size", min:2, max:100, def:10, step:.1}
+	// ,{name:"opacity", min:0, max:255, def:255, step:.1}
+	,{name:"strokeWeight", min:0, max:5, def:.5, step:.1}
+	,{name:"gap", min:1, max:3, def:1, step:1}
+	,{name:"lightStep", min:0, max:150, def:5, step:.1}
+	,{name:"lightSpeed", min:0, max:50, def:3, step:.1}
+	
+]
 
-//sketch_20191208165230
+let v = {}
+let sliders = {};
+let checkboxes = [];
+let labels = [];
+let values = {};
+
+function preload() {
+	font = loadFont("data/roboto-mono_regular.otf");
+}
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
-	rectMode(CENTER);
-	fill(255);
-	stroke(0);
-	strokeWeight(2)
-	textSize(height/8);
-	textAlign(CENTER, CENTER);
-	textFont('roboto mono');
 	angleMode(DEGREES);
 	background(0);
+	//pixelDensity(1)
+	genType('P5-TOOLS', 200);
+	createDiv('').class('frame');
+	let guiX = 10;
+	let guiY = 65;
+	for(let i=0; i < s.length; i++){
+		let ts = s[i];
+		v[ts.name] = ts.def;
+		sliders[ts.name] = createSlider(ts.min, ts.max, ts.def, ts.step);
+		sliders[ts.name].position(guiX, guiY+i*sGap).class('sliders');
+		sliders[ts.name].input(function(){
+				v[ts.name] = sliders[ts.name].value();
+				values[ts.name].html(sliders[ts.name].value());
+		});
+		labels.push(createDiv(ts.name));
+		labels[i].class('labels').position(guiX+2, guiY+15+i*sGap);
+		values[ts.name] = createDiv(ts.def);
+		values[ts.name].class('labels').addClass('values').position(130, guiY+15+i*sGap);
+		// checkboxes.push(createCheckbox('', false));
+		// checkboxes[i].position(width-40, 50+i*sGap).class('checkboxes');
+		
+		if(i == s.length-1){
+			let cbReset = createButton('Reset').position(guiX, guiY+(i+1)*sGap).class('slider-button').mousePressed(resetSliders);
+			let cbRandomize = createButton('Randomize').position(guiX+80, guiY+(i+1)*sGap).class('slider-button').mousePressed(randomSliders);
+		}
+	}
+}
+
+function randomSliders(){
+	changeSliders('random');
+}
+
+function resetSliders(){
+	changeSliders('reset')
+}
+
+function changeSliders(mode){
+	for(let i=0; i < s.length;i++){
+			let ts = s[i];
+			let tsMod = 1.0;
+			if(ts.name == 'scale' || ts.name == 'size'){
+				tsMod = .5;
+			}
+			let sVal = random(ts.min, ts.max*tsMod);
+			if(mode == 'reset'){
+				sVal = ts.def;
+				m.rot = 0;
+			}
+			sliders[ts.name].value(sVal);
+			v[ts.name] = sliders[ts.name].value();
+			values[ts.name].html(sliders[ts.name].value());
+	}
 }
 
 function draw() {
-	//textSize(noise(frameCount*.001)*height/4);
-	push();
-	textSize(20+abs(sin(frameCount*0.1))*height/4)
+	// for(let i=0; i<checkboxes.length;i++){
+	// 	if(checkboxes[i].checked()){
+	// 		let ts = s[i];
+	// 		let sVal = ts.min + abs(sin(frameCount*.1)*ts.max-ts.min);
+	// 		// let sVal = ts.min+noise(i*50+ frameCount*.001)*ts.max-ts.min;
+	// 		sliders[ts.name].value(sVal)
+	// 		// sliders[ts.name].attribute('disabled');
+	// 	}
+	// }
+	background(0, 255-v.trace)
 	translate(width / 2, height / 2);
-	rotate(frameCount / 2);
-	//let offx = abs(sin(frameCount*.12))*height/2;//noise(frameCount*.0012)*200;
-	text("p5-tools", 0, 0, width, height);
-	pop();
-
-	push();
-	textAlign(LEFT, TOP)
-	rectMode(CORNER)
-	textSize(20)
-	text("Welcome to P5-TOOLS!\nblah blah blah intro here...", 10, 60, width/4, height/4);
-	pop();
-
+	scale(v.scale);
+	m.rot += v.rot
+	rotate(m.rot);
+	translate(-bounds.w/3.1, 60);
+	strokeWeight(v.strokeWeight)
+	beginShape();
+	for(let i = 0; i < points.length; i+=v.gap) {
+		let p = points[i];
+		let flash = round(abs(sin(i*v.lightStep+frameCount*v.lightSpeed)));
+		
+		fill(0);
+		stroke(255)
+		if(flash == 1){
+			fill(255)
+			stroke(0)
+		}
+		ellipse(p.x, p.y, v.size);
+	}
+	endShape(CLOSE);
 }
 
+function genType(txtString, txtSize) {
+	points = font.textToPoints(txtString, 0, 0, txtSize, {
+		sampleFactor: .08,
+		simplifyThreshold:0
+	});
 
-
+	bounds = font.textBounds(txtString, 0, 0, txtSize);
+}
 
 /* CUSTOM FUNCTIONS FOR P5LIVE */
 // keep fullscreen if window resized
@@ -94,6 +180,10 @@ function ease(iVal, oVal, eVal){
 	return oVal += dx * eVal;
 }
 
+// processing compatibility
+function println(msg){
+	print(msg);
+}
 </script>
 
 </head>
