@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Juicy_loser_14/12_less_juice</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+			background: #000;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//Juicy_loser_14/12_less_juice
+
+let tweets;
+let tweetSel;
+let layer1;
+let layer0;
+let scribble;
+let sizeSlider;
+let rotSlider;
+let posSlider;
+let multiSlider;
+let colorSlider;
+let textsizeSlider;
+let strokeSlider;
+let model1;
+let label;
+let img;
+let img2;
+let yoff = 0;
+
+
+let w = 600,
+	h = 800,
+	scl = 1.0;
+
+function preload() {
+	tweets = loadJSON('data/tables/tweetsloser.txt');
+	model1 = loadModel('data/images/banana.obj');
+
+}
+
+function setup() {
+	background(0);
+	let x = (windowWidth / 3);
+	let y = (windowHeight / 10);
+	cnv = createCanvas(w * scl, h * scl).position(x, y);
+	scribble = createGraphics(w * scl, h * scl);
+	img = loadImage('data/images/orange.jpg');
+	img2 = loadImage('data/images/bananapeel.jpg');
+
+	// pulls a tweet from the json
+	getRandomTweet();
+
+	//Layers
+	layer0 = createGraphics(width, height);
+	layer1 = createGraphics(width, height, WEBGL);
+
+
+	// Sliders
+	sizeSlider = createSlider(10, 100, 50);
+	sizeSlider.position(160, 550);
+	let myDiv2 = createDiv("Fruits size").position(40, 550).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	rotSlider = createSlider(0, 360, 180);
+	rotSlider.position(160, 590);
+	let myDiv3 = createDiv("Fruits rotation").position(40, 590).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	multiSlider = createSlider(2, 10, 1);
+	multiSlider.position(160, 630);
+	let myDiv4 = createDiv("Fruits multiply").position(40, 630).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	posSlider = createSlider(-500, 1000, 0);
+	posSlider.position(160, 670);
+	let myDiv5 = createDiv("Fruits position").position(40, 670).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	colorSlider = createSlider(8, 255, 255);
+	colorSlider.position(160, 750);
+	let myDiv6 = createDiv("Background").position(40, 750).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	textsizeSlider = createSlider(0, 200, 50);
+	textsizeSlider.position(160, 790);
+	let myDiv7 = createDiv("Tweet size").position(40, 790).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	strokeSlider = createSlider(3, 20, 3);
+	strokeSlider.position(160, 830);
+	let myDiv9 = createDiv("Stroke weight").position(40, 830).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	let myDiv = createDiv("Juicy Loser").position(40, y).style("font-size", "40pt").style("color", "#fff").style('font-family', 'sans-serif');
+	let myDiv8 = createDiv("1. Draw: press mouse <BR> 2. Delete: backspace <BR> 3. Change the tweet: &#8594;<BR><BR> Remember: the more fruit you <BR> use, the least juice will be left.").position(40, 400).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+
+
+	layer0.translate(20, 20);
+	colorMode(HSB);
+	layer0.colorMode(HSB);
+	layer1.colorMode(HSB);
+	angleMode(DEGREES);
+	layer1.angleMode(DEGREES);
+
+
+}
+
+
+function draw() {
+	//Canvas background
+	background(0);
+
+
+
+	//backlayer — type & juice
+	layer0.background(colorSlider.value(), colorSlider.value(), colorSlider.value());
+
+	//Juice (thanks to p5.js reference)
+	layer0.push();
+	layer0.fill(30, 100, 100);
+
+	layer0.beginShape();
+	noStroke();
+	let xoff = 0;
+
+	// Iterate over horizontal pixels
+	for(let x1 = 0; x1 <= width + 20; x1 += 20) {
+		// Calculate a y value according to noise, map to
+
+		// 2D Noise
+		let y1 = map(noise(xoff, yoff), 0, 1, multiSlider.value() * 150, multiSlider.value() * 100);
+
+		// Set the vertex
+		layer0.vertex(x1 - 20, y1);
+		// Increment x dimension for noise
+		xoff += 0.05;
+
+	}
+
+	yoff += 0.01;
+	layer0.vertex(width + 20, height);
+	layer0.vertex(-20, height);
+	layer0.endShape(CLOSE);
+	layer0.pop();
+
+
+	// background colour interacting with text of tweet colour
+	if(colorSlider.value() <= 20) {
+		layer0.push();
+		layer0.fill(255);
+		layer0.textSize(textsizeSlider.value());
+		layer0.text(tweets[tweetSel].text, 0, 0, width - 20, height - 20);
+		layer0.pop();
+		layer0.push();
+		layer0.fill(255);
+		layer0.textSize(16);
+		layer0.text(tweets[tweetSel].created_at, 0, height - 50, width + 10, height + 20);
+		layer0.textAlign(RIGHT);
+		layer0.text('@realdonaldtrump', width - 35, height - 38);
+		layer0.pop();
+	} else {
+		layer0.push();
+		layer0.fill(0);
+		layer0.textSize(textsizeSlider.value());
+		layer0.text(tweets[tweetSel].text, 0, 0, width - 20, height - 20);
+		layer0.pop();
+		layer0.push();
+		layer0.fill(0);
+		layer0.textSize(16);
+		layer0.text(tweets[tweetSel].created_at, 0, height - 50, width + 10, height + 20);
+		layer0.textAlign(RIGHT);
+		layer0.text('@realdonaldtrump', width - 35, height - 38);
+		layer0.pop();
+	}
+
+
+
+	//3D layer — sculpture
+	//manages the amount of objects and their position 
+	layer1.clear();
+	let loopCount = multiSlider.value();
+	for(let j = 0; j < loopCount; j++) {
+		for(let i = 0; i < loopCount; i++) {
+			layer1.push();
+			layer1.noStroke();
+			let offx = map(j, 0, loopCount - 1, -layer1.width / 2, layer1.width / 2);
+			let offy = map(j, 0, loopCount - 1, -layer1.height / 2, layer1.height / 2);
+			if(loopCount <= 2) {
+				offx = 0;
+				layer1.translate(offx, -posSlider.value());
+			} else if(loopCount >= 3) {
+				offy = height / 2;
+				layer1.translate(offx, offy - posSlider.value() * i);
+			}
+
+			//orange properties
+			layer1.scale(sizeSlider.value()); // Scaled to make model fit into canvas
+			layer1.rotateY(rotSlider.value());
+			layer1.push();
+			layer1.directionalLight(0, 0, 255, 0, 0, -200);
+			layer1.pointLight(0, 0, 100, 0, 0, 500);
+			layer1.texture(img);
+			layer1.sphere(2);
+			layer1.pop();
+
+			//banana properties
+			layer1.rotateX(0);
+			layer1.rotateY(200);
+			layer1.rotateZ(0);
+			layer1.directionalLight(0, 0, 100, 0, 0, -20);
+			layer1.pointLight(0, 0, 100, 0, 0, 200);
+			layer1.translate(-3, -3.5);
+			layer1.texture(img2);
+			layer1.scale(.5);
+			layer1.model(model1);
+			layer1.pop();
+
+
+		}
+	}
+
+	//drawing layer — scribbles
+	if(mouseIsPressed && colorSlider.value() <= 20) {
+		scribble.stroke(255);
+		scribble.strokeWeight(strokeSlider.value());
+		scribble.noFill(0);
+		scribble.line(mouseX, mouseY, pmouseX, pmouseY);
+	} else if(mouseIsPressed) {
+		scribble.stroke(0);
+		scribble.strokeWeight(strokeSlider.value());
+		scribble.noFill(0);
+		scribble.line(mouseX, mouseY, pmouseX, pmouseY);
+
+	}
+
+	//show the layers
+	image(layer0, 0, 0);
+	image(layer1, 0, 0);
+	image(scribble, 0, 0);
+
+}
+
+
+//delete & change tweet
+function keyPressed() {
+	if(keyCode === BACKSPACE) {
+		scribble.clear();
+	} else if(keyCode === RIGHT_ARROW) {
+		getRandomTweet();
+
+	}
+}
+
+
+//get the column for the time stamp
+function getRandomTweet() {
+	tweetSel = floor(random(230));
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+var credits = { 
+    "names" : [ 
+        "soyeon.kim" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"claudia.colombo" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "Tired of intellectually low quality fruit? Now you can give these fruits what they deserve. Create a poster/meme that express your juicy resentment." 
+} 
+
+</script>
+
+
+</head>
+<body>
+
+</body>
+</html>

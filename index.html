@@ -2,7 +2,40 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>P5-TOOLS</title>
+	<title>p5-tools</title>
+
+	<script type="text/javascript">
+		// list of P5-TOOLS!
+		// double check all for window.blur noLoop...
+		// double check all for print...
+		// double check audio
+		let tools = [
+			'happy-little-accidents' // gui overlapped (corrected quicly)
+			,'download-to-earth' // gui off unless fullscreen
+			,'haiku-u-du' // slight gui overlap
+			,'make-choice' // +7mb... slow to load??
+			,'shady-shaders' // +7mb... slow to load?
+			,'grid-creator' // 
+			,'cake-times' // GUI in the way
+			,'juicy-loser' // needs resizing!
+			,'mandala' // GUI love
+			,'myfancyposter' // blocking GUI
+			,'nudibranch' // gui could be on left?
+			,'PosterGenerator9000' // comp fan ramping up
+			// missing lu+alex smaller filesize
+		];
+
+		function shuffle(a) {
+		    for (let i = a.length - 1; i > 0; i--) {
+		        const j = Math.floor(Math.random() * (i + 1));
+		        [a[i], a[j]] = [a[j], a[i]];
+		    }
+		    return a;
+		}
+		
+		shuffle(tools); // good or bad.. avoids hierarchy
+
+	</script>
 
 	<style type="text/css">
 		:root {
@@ -107,7 +140,7 @@
 <body>
 	<div id="header">
 		<select id="tool-select" class="nav" onchange="selectTool(this.value);">
-			<option value="p5-tools">P5-TOOLS</option>
+			<option value="p5-tools">p5-tools</option>
 			<option disabled value>----------------</option>
 			  <!-- <optgroup label="Swedish Cars"></optgroup> -->
 		</select>
@@ -129,10 +162,7 @@
 
 		 */
 
-		let tools = [
-			'Test-Tool'
-			,
-		];
+		
 
 		let p5frame = document.getElementById('p5-frame');
 		let p5f = p5frame.contentWindow;
@@ -169,9 +199,27 @@
 			selectTool(curTool);
 		}
 
+		// check tool address
+		// var url = 'https://mapsengine.google.com/map/embed?mid=zGLD-nMIJQAg.k0gTyNlOPz_Q';
+		function UrlExists(url) {
+			let http = new XMLHttpRequest();
+			http.open('HEAD', url, false);
+			http.send();
+			if (http.status != 404){
+				return true;
+			}else{
+				return false;
+			}
+		}
+
 		// set tool
 		function selectTool(selTool){
-			p5frame.src = 'tools/'+selTool.toLowerCase()+'/?'+Math.floor(Math.random()*99999);
+			let toolPath = 'tools/'+selTool.toLowerCase()+'/?'+Math.floor(Math.random()*99999);
+			if(!UrlExists(toolPath)){
+				window.location.hash = '#';
+				window.location.reload();
+			}
+			p5frame.src = toolPath;
 			if(selTool == introName){
 				location.replace('#');
 			} else {

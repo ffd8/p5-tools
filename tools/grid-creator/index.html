@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>P5LIVE – sketch</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//KLAU_FINAL!!!!!!!!!!!!!!!!!_20191218132128
+
+var credits = {
+	"names": [
+		"Martina.Doležalová" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+		, "Klaudia.Kosik"
+	],
+	"class": "MA",
+	"description": "Welcome to the Grid Creator! A perfect tool for creating, testing and randomly generate a special grid for you. Change the size, spaces between and the style of the grid with the menu on the right side. Adjust the canvas size of your project and click the SAVE button to download a png file ready to use. Try it out and check what you can do with the Grid Creator tool!"
+}
+
+function saveFrame(toolName) {
+	let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+	let filename = toolName + 'grid' + timestamp + '.png';
+	// filename = toolName + '.png'; // uncomment to remove timestamp from name 
+	a.save(filename);
+}
+
+// CODE START HERE
+
+let myFill, bg, RectBar, a;
+let sliderColor, sliderThickness, sliderRowSpace, sliderColumnSpace;
+let buttonOutlines, buttonShapes, buttonChange, buttonReset, buttonRandom, buttonSave,buttonMenu, inputX, inputY;
+let label1, label2, label3, label4, label5, label6;
+let shapeMode = true;
+
+
+function setup() {
+	createCanvas(windowWidth - 230, windowHeight);
+	background(255);
+	background('#150e28');
+	
+	
+	
+
+	let ww = windowWidth;
+	let wwbar = ww - 200;
+	
+	//background menu
+	buttonMenu = createButton("")
+	buttonMenu.position(wwbar - 30, 0);
+	buttonMenu.size(230, height);
+	buttonMenu.style('background-color', '#150e28')
+	buttonMenu.style('border-style', 'none')
+	
+	//TITLE
+	label = createDiv('Grid Creator');
+	label.position(wwbar + 2, 10);
+	label.style('color', '#ffffff');
+	label.style('font-size', '15pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv('Check what you can do:');
+	label.position(wwbar + 4, 32);
+	label.style('color', '#ffffff');
+	label.style('font-size', '9pt');
+	label.style('font-family', 'sans-serif')
+
+	//COLOR
+	sliderColor = createSlider(0, 100, random(100)); // min, max, default
+	sliderColor.position(wwbar, 72);
+	sliderColor.input(updateColor);
+
+	label = createDiv('Color');
+	label.position(wwbar + 5, 60);
+	label.style('color', '#ffffff');
+	label.style('font-size', '9pt');
+	label.style('font-family', 'sans-serif')
+
+	//THICKNESS
+	sliderThickness = createSlider(1, height / 4, 30); // min, max, default
+	sliderThickness.position(wwbar, 107);
+	sliderThickness.input(updatesSlider);
+
+	//label "thikness"
+	label1 = createDiv('Thickness');
+	label1.position(wwbar + 5, 95);
+	label1.style('color', '#ffffff');
+	label1.style('font-size', '9pt');
+	label1.style('font-family', 'sans-serif')
+
+	//label for number 
+	label1n = createDiv('');
+	label1n.position(wwbar + 105, 95);
+	label1n.style('color', '#ffffff');
+	label1n.style('font-size', '9pt');
+	label1n.style('font-family', 'sans-serif')
+
+	//slider ROW SPACE
+	sliderRowSpace = createSlider(0, height, height / 9);
+	sliderRowSpace.position(wwbar, 142);
+	sliderRowSpace.input(updatesSlider);
+
+	//label for row space
+	label2 = createDiv('Row Space');
+	label2.position(wwbar + 5, 130);
+	label2.style('color', '#ffffff');
+	label2.style('font-size', '9pt');
+	label2.style('font-family', 'sans-serif')
+
+	//labale for number
+	label2n = createDiv('');
+	label2n.position(wwbar + 105, 130);
+	label2n.style('color', '#ffffff');
+	label2n.style('font-size', '9pt');
+	label2n.style('font-family', 'sans-serif')
+
+	//slider COLUMN SPACE
+	sliderColumnSpace = createSlider(0, width, width / 9);
+	sliderColumnSpace.position(wwbar, 177);
+	sliderColumnSpace.input(updatesSlider);
+
+	//label for Column space
+	label3 = createDiv('Column Space');
+	label3.position(wwbar + 5, 165);
+	label3.style('color', '#ffffff');
+	label3.style('font-size', '9pt');
+	label3.style('font-family', 'sans-serif')
+
+	//label for number
+	label3n = createDiv('');
+	label3n.position(wwbar + 105, 165);
+	label3n.style('color', '#ffffff');
+	label3n.style('font-size', '9pt');
+	label3n.style('font-family', 'sans-serif')
+
+	//BUTTON OUTLINES
+	buttonOutlines = createButton("Outlines");
+	buttonOutlines.position(wwbar + 5, 205);
+	buttonOutlines.mousePressed(changeToOutlines);
+	buttonOutlines.size(55);
+
+	//BUTTON SHAPES
+	buttonShapes = createButton("Shapes");
+	buttonShapes.position(wwbar + 5 + 67, 205);
+	buttonShapes.mousePressed(changeToShapes);
+	buttonShapes.size(55);
+
+
+	// CANVAS SIZE
+	label4 = createDiv('Canvas Size');
+	label4.position(wwbar + 5, 235);
+	label4.style('color', '#ffffff');
+	label4.style('font-size', '9pt');
+	label4.style('font-family', 'sans-serif')
+
+	//inputs for size X
+	inputX = createInput(width);
+	inputX.position(wwbar + 7, 252);
+	inputX.size(50);
+
+	// PX
+	label5 = createDiv('X size (px)');
+	label5.position(wwbar + 70, 252);
+	label5.style('color', '#ffffff');
+	label5.style('font-size', '9pt');
+	label5.style('font-family', 'sans-serif')
+
+	//inputs for size Y
+	inputY = createInput(height);
+	inputY.position(wwbar + 7, 272);
+	inputY.size(50);
+
+	// PX2
+	label6 = createDiv('Y size (px)');
+	label6.position(wwbar + 70, 272);
+	label6.style('color', '#ffffff');
+	label6.style('font-size', '9pt');
+	label6.style('font-family', 'sans-serif')
+
+
+	//BUTTON CHANGE
+	buttonChange = createButton("Change")
+	buttonChange.position(wwbar + 6, 295);
+	buttonChange.mousePressed(reSizeCanvas);
+	buttonChange.size(55);
+
+	//BUTTON RESET
+	buttonReset = createButton("Reset")
+	buttonReset.position(wwbar + 6 + 67, 295);
+	buttonReset.mousePressed(resetCanvas);
+	buttonReset.size(55);
+
+
+	//BUTTON RANDOM
+	buttonRandom = createButton("Random Generator")
+	buttonRandom.position(wwbar + 15, 335);
+	buttonRandom.mousePressed(changeToRandom);
+	buttonRandom.size(110);
+	buttonRandom.style('background-color', '#60498a')
+	buttonRandom.style('color', '#ffffff')
+	
+
+	//BUTTON SAVE
+	buttonSave = createButton("Save")
+	buttonSave.position(wwbar + 15, 380);
+	buttonSave.mousePressed(savePNG);
+	buttonSave.size(110);
+	buttonSave.style('color', '#60498a');
+	
+	genLayer();
+
+	//changeToShapes();
+	updateColor()
+	updatesSlider();
+	buttonReset.hide();
+}
+
+function draw() {
+	background('#150e28');
+	updateGrid();
+	
+}
+
+// this is function for a GID LAYER with all modes (called in setup)
+function genLayer() {
+	a = createGraphics(inputX.value(), inputY.value());
+
+	a.colorMode(HSB, 100);
+	a.rectMode(CENTER);
+}
+
+function updateColor() {
+	if(shapeMode) {
+		a.fill(sliderColor.value(), 100, 85, 20);
+		a.noStroke();
+	} else {
+		a.stroke(sliderColor.value(), 100, 85, 70);
+		a.noFill();
+	}
+	updateGrid();
+}
+
+function updateShapes() {
+	shapeMode = true;
+	if(random(100) > 50) {
+		shapeMode = false;
+	}
+	updateGrid();
+}
+
+function changeToShapes() {
+	shapeMode = true
+	updateColor()
+}
+
+function changeToOutlines() {
+	shapeMode = false
+	updateColor()
+}
+
+
+
+// this is function for creating actual GRID!
+function updateGrid() {
+	a.clear();
+
+	let x = sliderRowSpace.value();
+	let y = sliderColumnSpace.value();
+
+	//Horizontal
+	for(let i = 0; i < 100; i++) {
+		a.rect(a.width / 2, a.height / 2 + i * x, a.width, (sliderThickness.value()));
+		if(i > 0) {
+			a.rect(a.width / 2, a.height / 2 + -i * x, a.width, (sliderThickness.value()));
+		}
+	}
+
+	//Vertical
+	for(let i = 0; i < 100; i++) {
+		a.rect(a.width / 2 + i * y, a.height / 2, (sliderThickness.value()), a.height);
+		if(i > 0) {
+			a.rect(a.width / 2 + -i * y, a.height / 2, (sliderThickness.value()), a.height);
+		}
+	}
+
+	push();
+	fill(255);
+	noStroke();
+	rect(0, 0, a.width, a.height);
+	pop();
+	
+	image(a, 0, 0);
+	noLoop();
+	
+}
+
+
+function updatesSlider() {
+	loop();
+	//showing value of slider in a text and also change a text.
+	label1.html('Thickness: ');
+	label1n.html(sliderThickness.value());
+
+	label2.html('Row Space : ');
+	label2n.html(sliderRowSpace.value());
+
+	label3.html('Column Space : ');
+	label3n.html(sliderColumnSpace.value());
+
+	updateGrid();
+}
+
+// function for random button
+function changeToRandom() {
+	sliderThickness.value(random(180));
+	sliderRowSpace.value(random(height));
+	sliderColumnSpace.value(random(width));
+	sliderColor.value(random(100));
+	updateColor();
+	updateGrid();
+	updateShapes();
+}
+
+
+// function for resize canvas size
+function reSizeCanvas() {
+//	resizeCanvas(inputX.value(), inputY.value());
+	genLayer();
+	updateColor()
+	updateGrid();
+	buttonReset.show();
+	loop();
+
+}
+
+// function for reset canvas size
+function resetCanvas() {
+	resizeCanvas(inputX.value(windowWidth - 230), inputY.value(windowHeight));
+	createCanvas(windowWidth - 230, windowHeight);
+	genLayer();
+	updateColor()
+	updateGrid();
+
+}
+
+// saving .png
+function savePNG() {
+	a.save('grid');
+	loop();
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

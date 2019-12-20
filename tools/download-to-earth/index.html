@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>FINAL-layerSave</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//FINAL-layerSave
+
+var credits = { 
+    "names" : [ 
+        "anahat.kaur" , 'simone.marie' , 'jingyu.lee' , 'kwaku.opoku' 
+    ] 
+    ,"class" : "MDes" 
+    ,"description" : "Made to enable YOU to start the conversation about climate change. \nCreate. Reflect. Share." 
+}
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    layerCombo.save(filename); 
+}
+
+let slider;
+let sel;
+let selGS;
+let field;
+let layer;
+let layer2;
+let layerGS;
+let layerCombo;
+let img;
+let checkBW;
+//let fb, scl = .99;
+let randomQuoteObject;
+
+let myFont = "";
+let fonts, myFonts1, myFonts2, myFonts3;
+
+let selectedQuote = "";
+let myTextArea;
+let buttonQuote;
+let buttonClear;
+let colorPicker;
+
+
+
+/////////////////////////////////////////////////////////////////////preload fonts
+
+function preload() {
+	myFont = loadFont('fonts/AvenirLTPro-Book.otf');
+	myFonts1 = loadFont('fonts/AvenirLTPro-Book.otf');
+	myFonts2 = loadFont('fonts/NapoleoneSlabITCStd.otf');
+	myFonts3 = loadFont('fonts/CODE Bold.otf');
+}
+
+/////////////////////////////////////////////////////////////////////quotes
+
+let quotesObject = [{
+	keywords: "Endangered Species",
+	quotes: [
+		"Human activity contributes to loss of habitat",
+		"Defend the endangered species act",
+		"Humans are driving the 6th mass extinction"
+	]
+}, {
+	keywords: "Forest Fires",
+	quotes: ["An average of 67'000 wildfires occur annually",
+		"Forest fires heavily polute air and water quality",
+		"When humans rise, forests fall",
+		"Let there be more forests to grow people",
+		"Plant a native garden"
+	]
+}, {
+	keywords: "Soil Erosion",
+	quotes: ["regenerative agriculture restores degraded soil biodiversity",
+		"When soil erodes, less crops grow, you get that hoe?",
+		"Stay grounded. Buy (your meat) local",
+		"keep the oil in the soil!"
+	]
+}, {
+	keywords: "Garbage",
+	quotes: ["don't be trashy, sort your garbage!",
+		"Instead of throwing your life away, recycle!",
+		"Humans throw anything away..literally",
+		"Keep Earth clean, it's not Uranus!"
+	]
+}, {
+	keywords: "Glaciers",
+	quotes: ["humans keep using fossil fuels, let's chill on the burning",
+		"The ice keeps melting, stop with the polar opposites",
+		"We need the ice! Theres's snow place like home...",
+	]
+}, {
+	keywords: "Ocean",
+	quotes: ["why do we keep waving our oceans goodbye?", //pier pressure",
+		"Stop consuming! Water you doing?",
+		"With all these plastics, we get tide down",
+		"carbon sink or swim!"
+	]
+}]
+
+
+
+function setup() {
+	createCanvas(windowWidth, windowHeight + 100);
+	//	fb = createGraphics(width, height);
+	angleMode(DEGREES);
+	layer = createGraphics(height / 2, height / 2 * 1.4142);
+	layer2 = createGraphics(height / 2, height / 2 * 1.4142);
+	layer2.imageMode(CENTER);
+	layerGS = createGraphics(height / 2, height / 2 * 1.4142);
+	layerGS.imageMode(CENTER);
+	layerCombo = createGraphics(height / 2, height / 2 * 1.4142);
+
+	let wby2 = width / 2;
+	let hby2 = (height - 100) / 2;
+	let wby4 = width / 4;
+	let hby4 = (height - 100) / 4;
+
+	/////////////////////////////////////////////////////////////////////download button
+
+	// buttonPrint = createButton("Download");
+	// buttonPrint.position(wby2 + 250, hby2 + 390);
+	// buttonPrint.size(330, 40);
+	// buttonPrint.style('border-color', '#ffffff');
+	// buttonPrint.style('border-radius', '5px');
+	// buttonPrint.style('width', '330px');
+	// buttonPrint.style('font-size', '16px');
+	// buttonPrint.mousePressed(saveOutput);
+
+
+	/////////////////////////////////////////////////////////////////////checkbox
+
+	checkBW = createCheckbox('label', false);
+	checkBW.position(wby2 + 320, hby4 + 35);
+
+	/////////////////////////////////////////////////////////////////////get image button
+
+	button = createButton("Get Image");
+	button.position(wby2 + 250, hby4 - 35);
+	button.size(330, 40);
+	button.mousePressed(getListImage);
+	button.style('border-color', '#ffffff');
+	button.style('border-radius', '5px');
+	button.style('width', '330px');
+	button.style('font-size', '16px');
+
+
+	/////////////////////////////////////////////////////////////////////get shape button
+
+	buttonGS = createButton("Get Shape");
+	buttonGS.position(wby2 + 250, hby4 + 185);
+	buttonGS.size(330, 40);
+	buttonGS.mousePressed(getShape);
+	buttonGS.style('border-color', '#ffffff');
+	buttonGS.style('border-radius', '5px');
+	buttonGS.style('width', '330px');
+	buttonGS.style('font-size', '16px');
+
+	/////////////////////////////////////////////////////////////////////get quote button
+
+	buttonQuote = createButton("Get Quote");
+	buttonQuote.position(wby2 + 250, hby2 + 155);
+	buttonQuote.size(330, 40);
+	buttonQuote.mousePressed(displayQuote);
+	buttonQuote.style('border-color', '#ffffff');
+	buttonQuote.style('border-radius', '5px');
+	buttonQuote.style('width', '330px');
+	buttonQuote.style('font-size', '16px');
+
+	/////////////////////////////////////////////////////////////////////color picker
+	colorPicker = createColorPicker("white");
+	colorPicker.position(wby2 + 350, hby2 + 320);
+
+	/////////////////////////////////////////////////////////////////////text size
+	sliderTextSize = createSlider(0, 255, 60);
+	sliderTextSize.position(wby2 + 350, hby2 + 205);
+	sliderTextSize.size(220, 20);
+
+	/////////////////////////////////////////////////////////////////////leading
+	sliderLeading = createSlider(0, 255, 50);
+	sliderLeading.position(wby2 + 350, hby2 + 235);
+	sliderLeading.size(220, 20);
+
+	/////////////////////////////////////////////////////////////////////Y pos
+	sliderY = createSlider(0, 1440, 0); //1440
+	sliderY.position(wby2 + 350, hby2 + 265);
+	sliderY.size(220, 20);
+	/////////////////////////////////////////////////////////////////////X pos
+	sliderX = createSlider(0, 1000, 0); //1000
+	sliderX.position(wby2 + 350, hby2 + 295);
+	sliderX.size(220, 20);
+
+	/////////////////////////////////////////////////////////////////////drop down topic
+
+	sel = createSelect();
+	sel.position(wby2 + 250, hby2 - 310);
+	sel.option('Endangered Species');
+	sel.option('Forest Fires');
+	sel.option('Soil Erosion');
+	sel.option('Garbage');
+	sel.option('Glaciers');
+	sel.option('Ocean');
+	sel.changed(getImage);
+	sel.style('font-family', 'Helvetica');
+	sel.style('font-size', '16px');
+	sel.style('border-color', '#ffffff');
+	sel.style('border-width', '1px');
+	sel.style('border-radius', '5px');
+	sel.style('width', '330px');
+	sel.style('height', '40px');
+	sel.style('background-color', '#000');
+	sel.style('color', '#fff');
+
+
+
+	/////////////////////////////////////////////////////////////////////shape sel
+
+	selGS = createSelect();
+	selGS.position(wby2 + 250, hby2 - 90);
+	selGS.option('Straight');
+	selGS.option('Round');
+	selGS.changed(getShape);
+	selGS.style('font-family', 'Helvetica');
+	selGS.style('font-size', '16px');
+	selGS.style('border-color', '#ffffff');
+	selGS.style('border-width', '1px');
+	selGS.style('border-radius', '5px');
+	selGS.style('width', '330px');
+	selGS.style('height', '40px');
+	selGS.style('background-color', '#000');
+	selGS.style('color', '#fff');
+
+	/////////////////////////////////////////////////////////////////////fonts sel
+
+	fonts = createSelect();
+	fonts.position(wby2 + 250, hby2 + 100);
+	fonts.option('AvenirLTPro-Book');
+	fonts.option('NapoleoneSlabITCStd');
+	fonts.option('CODE Bold');
+	fonts.changed(fontChanged);
+	fonts.style('font-family', 'Helvetica');
+	fonts.style('font-size', '16px');
+	fonts.style('border-color', '#ffffff');
+	fonts.style('border-width', '1px');
+	fonts.style('border-radius', '5px');
+	fonts.style('width', '330px');
+	fonts.style('height', '40px');
+	fonts.style('background-color', '#000');
+	fonts.style('color', '#fff');
+
+}
+
+function draw() {
+	background(0);
+	//fill(255,0,0);
+	layer.background(255);
+
+	let wby2 = width / 2;
+	let hby2 = (height - 100) / 2;
+	let wby4 = width / 4;
+	let hby4 = (height - 100) / 4;
+
+	/////////////////////////////////////////////////////////////////////lines
+	line(wby4 - 350, 60 + 50, 705, 60 + 50);
+	line(wby2 - 60, 60 + 50, 735 + 675, 60 + 50);
+	line(wby2 - 60, 330 , 735 + 675, 330);
+	line(wby2 - 60, 520, 735 + 675, 520);
+	line(wby2 - 60, 760 + 50, 735 + 675, 760 + 50);
+	stroke(255);
+
+
+	push();
+	textLeading(20)
+	fill(255);
+	noStroke();
+	textSize(24);
+	text('Download to Earth', wby4 - 350, 35 + 50);
+	textSize(12);
+	text('Visuals for advocating \nclimate change awareness.', wby4, 22 + 50);
+	text('Academy of Art and Design Basel FHNW | HGK \nInstitute of Visual Communication', wby4 + 340, 22 + 50);
+	text('International Master of Graphic Design UIC/HGK \nDigital Culture, Lecturer. Ted Davis', wby2 + 250, 22 + 50);
+	text('Designed and built with all the love in the world by @MDes 2019, HGK. Currently v1.0.0-beta.1.', 30, 920);
+	text('Code licensed MDes 2019, FHNW HGK, docs CC BY 1.0.', 735, 920);
+	text('Greyscale', wby2 + 250, hby4 + 50);
+	text('Text Size', wby2 + 250, hby2 + 220);
+	text('Leading', wby2 + 250, hby2 + 250);
+	text('X Position', wby2 + 250, hby2 + 280);
+	text('Y Position', wby2 + 250, hby2 + 310);
+	text('Color', wby2 + 250, hby2 + 340);
+	text('Click on the "Save" button \non top to save your poster! ', wby4 + 650, 782 + 65);
+	textSize(16);
+	text('Preview', wby4 - 350, 72 + 80);
+	text('Image', wby4 + 340, 72 + 80);
+	text('Graphic Shape', wby4 + 340, 322 + 50);
+	text('Quote', wby4 + 340, 512 + 50);
+	text('You are good to go!', wby4 + 340, 782 + 65);
+	pop();
+
+
+
+	if(img != undefined) {
+		fill(0);
+		layer2.image(img, layer2.width / 2, layer2.height / 2);
+	}
+
+	let slidX = sliderX.value();
+	let slidY = sliderY.value();
+	let led = sliderLeading.value();
+	let txtSize = sliderTextSize.value();
+	let col = colorPicker.value();
+
+
+	/////////////////////////////////////////////////////////////////////layers
+	layer.textSize(txtSize);
+	layer.fill(col);
+	layer.textLeading(led);
+	layer.image(layer2, 0, 0);
+
+	if(checkBW.checked()) {
+		layer.filter(GRAY)
+	}
+
+	layer.textFont(myFont);
+	layer.text(selectedQuote.quote, slidY, slidX, height / 2 - slidY, height / 2 * 1.4142);
+	layerCombo.image(layer, 0, 0);
+	layerCombo.image(layerGS, 0, 0);
+	
+	image(layerCombo, 180, 140);
+}
+
+
+
+function displayQuote() {
+	console.log("buttonPressed");
+
+	let key = sel.value();
+	let keyQuotes = [];
+	for(let i = 0; i < quotesObject.length; i++) {
+		if(quotesObject[i].keywords == key) {
+			keyQuotes = quotesObject[i].quotes;
+		}
+	}
+	let showquote = {
+		quote: random(keyQuotes),
+		quoteSize: 20
+	};
+
+	selectedQuote = showquote;
+}
+
+function saveOutput() {
+	layerCombo.save('out.png');
+}
+
+function getListImage() {
+	getImage(sel.value());
+}
+
+
+function fontChanged() {
+	if(fonts.value() == 'AvenirLTPro-Book') {
+		myFont = myFonts1
+	} else if(fonts.value() == 'NapoleoneSlabITCStd') {
+		myFont = myFonts2
+	} else if(fonts.value() == 'CODE Bold') {
+		myFont = myFonts3
+	}
+}
+
+
+function getImage(keywords) {
+	img = loadImage("https://source.unsplash.com/1600x900/?" + keywords);
+}
+
+
+function getShape() {
+	if(selGS.value() == 'Round') {
+		layerGS.blendMode(OVERLAY);
+		layerGS.clear();
+		layerGS.randomSeed(1);
+		layerGS.fill(0, 0, 0, 120);
+		layerGS.noStroke();
+		layerGS.beginShape();
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.bezierVertex(random(layerGS.width), random(height), random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height));
+		layerGS.bezierVertex(random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height));
+		layerGS.bezierVertex(random(layerGS.width), random(height), random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height));
+		//layerGS.bezierVertex(random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height), random(layerGS.width), random(layerGS.height));
+		layerGS.endShape();
+	} else {
+		layerGS.clear();
+		//layerGS2.frameRate(0.001);
+		layerGS.fill(0, 0, 0, 120);
+		layerGS.noStroke();
+		layerGS.beginShape();
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.vertex(random(layerGS.width), random(layerGS.height));
+		layerGS.endShape();
+	}
+
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

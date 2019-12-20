@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>19/12-FINAL3-GOOD</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+
+
+//19/12-FINAL3-GOOD
+
+var credits = { 
+    "names" : [ 
+        "Fanny.Demier" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"Sabina.Laner" 
+    ] 
+    ,"class" : "MDes" 
+    ,"description" : "Make your choice, go trough all the steps and be surprised! Start again ;)" 
+}
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+}
+
+
+
+let inpC, myColor;
+let myFont;
+let myFont4;
+let buttonFill;
+let buttonFill2;
+let txt = '';
+let number = 3;
+let myalphabet1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+let img;
+let img2;
+let img3;
+let x = 0;
+let xoff = 0.6;
+
+let data = {
+	scene: 0,
+	organic: false,
+	x: 0,
+	y: 0,
+	size: 300,
+	textSize: 100,
+	//fillColor: color(255),
+	fillColor: 100,
+	number: 3,
+	freetxt: '',
+	//freetxt: 'SUNFLOWER',
+	clickX: 0,
+	clickY: 0,
+	//clickX: 500,
+	//	clickY: 500,
+	pickNumber: true,
+	//letter: myalphabet1[i],
+}
+
+let dataOriginal = data;
+
+let bg = 0;
+
+let angle = 0.0;
+let jitter = 0.0;
+
+//current size - continuously updated
+let size = 10;
+//minimum size
+let minSize = 10;
+//maximum size
+let maxSize = 1400;
+//change speed for size (how much will the size increase/decrease each frame)
+let sizeSpeed = 0.025;
+
+
+var xx, y, nx, ny;
+var ss = 50.0;
+var sMin = 55;
+var sg = 2;
+var nxv = 0.006;
+var nyv = 0.005;
+
+
+function preload() {
+	myFont = loadFont('data/fonts/GT-america/GT-America-Trial-Expanded-Light.otf');
+	//	myFontL = loadFont('data/fonts/GT-america/GT-America-Trial-Expanded-Bold.otf');
+	myFont4 = loadFont('data/fonts/GT-america/GT-America-Trial-Expanded-Bold.otf');
+	img = loadImage('https://source.unsplash.com/400x400/?experimental');
+	img2 = loadImage('https://source.unsplash.com/400x400/?current-events');
+	img3 = loadImage('https://source.unsplash.com/400x400/?architecture');
+	img4 = loadImage('https://source.unsplash.com/400x400/?patterns');
+	img5 = loadImage('https://source.unsplash.com/400x400/?film');
+
+
+	myFontA = loadFont('data/font-tool/Agentur-Display.otf');
+	myFontB = loadFont('data/font-tool/BeatriceDisplay-Semibold.otf');
+	myFontC = loadFont('data/font-tool/Coconat-BoldExt.otf');
+	myFontD = loadFont('data/font-tool/Digestive.otf');
+	myFontE = loadFont('data/font-tool/Executive-55Regular.otf');
+	myFontF = loadFont('data/font-tool/Faune-TextItalic.otf');
+	myFontG = loadFont('data/font-tool/GTFTeknoTRIAL-Two.otf');
+	myFontH = loadFont('data/font-tool/Haptik-Light-Rotalic.otf');
+	myFontI = loadFont('data/font-tool/IKANSEEYOUALL.otf');
+	myFontJ = loadFont('data/font-tool/JockeyOne-Regular.otf');
+	myFontK = loadFont('data/font-tool/KoperTrial-Regular.otf');
+	myFontL = loadFont('data/font-tool/Lack-Line-Regular.otf');
+	myFontM = loadFont('data/font-tool/Le_Murmure-Regular_web.otf');
+	myFontN = loadFont('data/font-tool/NN_NoireTrial.otf');
+	myFontN2 = loadFont('data/font-tool/Nostrav1.0-StreamTrial.otf');
+	myFontO = loadFont('data/font-tool/Opposit-Heavy.otf');
+	myFontP = loadFont('data/font-tool/Polsku.otf');
+	myFontQ = loadFont('data/font-tool/Quicksand_Dash.otf');
+	myFontR = loadFont('data/font-tool/Ribes-Black.otf');
+	myFontS = loadFont('data/font-tool/STIXGeneral.otf');
+	myFontT = loadFont('data/font-tool/Totentanz-Slanted.otf');
+	myFontU = loadFont('data/font-tool/Nostrav1.0-SettTrial.otf');
+	myFontV = loadFont('data/font-tool/Vinter.otf');
+	myFontW = loadFont('data/font-tool/WishesScriptCapsText-Light.otf');
+	myFontX = loadFont('data/font-tool/PVC-BANNERULTRA.otf');
+	myFontY = loadFont('data/font-tool/Prumo Poster Outline.otf');
+	myFontZ = loadFont('data/font-tool/ZemestroStd-Book.otf');
+}
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	//let c = createCanvas(windowWidth, windowHeight);
+	//	saveCanvas('myCanvas', 'jpg');
+	//	saveCanvas(c, 'myCanvas', 'jpg');
+	background(255);
+	rectMode(CENTER);
+	// let input = createInput('');
+
+	//frameRate(1);
+
+	myColor = color(188, 188, 226);
+	inpC = createColorPicker(myColor).position(width / 2 - 40, height / 3);
+	inpC.size(70, 30);
+	inpC.input(setColor); // on change to color
+	inpC.hide()
+
+	buttonFill = createButton(">");
+	buttonFill.position(width * 0.9, height * 0.85);
+	buttonFill.size(40, 40);
+	buttonFill.style('font-size', '20px');
+	buttonFill.style('font-family', 'GT-America');
+	buttonFill.style('background-color', 'ffff');
+	buttonFill.style('border', '1px solid #000');
+	buttonFill.style('outline', 'none');
+	buttonFill.hide();
+
+	buttonFill2 = createButton("<");
+	buttonFill2.position(width * 0.06, height * 0.85);
+	buttonFill2.size(40, 40);
+	buttonFill2.style('font-size', '20px');
+	buttonFill2.style('font-family', 'GT-America');
+	buttonFill2.style('background-color', 'ffff');
+	buttonFill2.style('border', '1px solid #000');
+	buttonFill2.style('outline', 'none');
+	if(mouseIsPressed) {
+		clearStorage(print(data));
+	}
+	buttonFill2.hide();
+
+
+
+
+	//noCursor();
+	nx = random(width);
+	ny = random(height);
+
+	px = random(width - 500);
+	py = random(height - 500);
+
+	px2 = random(width - 500);
+	py2 = random(height - 500);
+
+	px3 = random(width - 500);
+	py3 = random(height - 500);
+
+	px4 = random(width - 500);
+	py4 = random(height - 500);
+
+	px5 = random(width - 500);
+	py5 = random(height - 500);
+
+	px6 = random(width - 500);
+	py6 = random(height - 500);
+
+	px7 = random(width - 500);
+	py7 = random(height - 500);
+
+	px8 = random(width - 500);
+	py8 = random(height - 500);
+
+	px9 = random(width - 500);
+	py9 = random(height - 500);
+
+
+	data = {
+		scene: 0,
+		organic: false,
+		x: width / 2,
+		y: height / 2,
+		size: 300,
+		textSize: 100,
+		//fillColor: color(255),
+		fillColor: 100,
+		number: 3,
+		freetxt: '',
+		//freetxt: 'SUNFLOWER',
+		clickX: 0,
+		clickY: 0,
+		//clickX: 500,
+		//	clickY: 500,
+		pickNumber: true,
+		//letter: myalphabet1[i],
+	}
+}
+
+
+function mousePressed() {
+
+	if(data.scene == 1) {
+		if(dist(mouseX, mouseY, width * .25, height * .55) < height * .27) {
+			data.fillColor = color(188, 188, 226);
+			data.organic = true;
+			data.scene = 2;
+		}
+
+		if(dist(mouseX, mouseY, width * .75, height * .55) < height * .27) {
+			data.fillColor = color(188, 188, 226);
+			data.organic = false;
+			data.scene = 2;
+		}
+	}
+
+
+	if(data.scene == 5) {
+		data.clickX = mouseX;
+		data.clickY = mouseY;
+	}
+
+	//HOW TO BLOCK THE NUMBER COUNTER
+	if(data.scene == 6) {
+		data.pickNumber = false;
+	}
+	print(data);
+}
+
+
+
+function draw() {
+
+	if(data.scene == 0) {
+		buttonFill2.hide();
+
+		background(188, 188, 226);
+		rectMode(CORNER);
+		fill(255);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Make your choice', 50, 50, width);
+
+		fill(255);
+		textSize(28);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('With this creative tool you will make your own choices. Go trough all the steps, take decision and be surprised at the end with your unique and personal visual. If you want you can start again, every choice you make will have different effect and offer many results.', 420, 200, width / 2);
+
+		buttonFill.show();
+		buttonFill.mouseClicked(goNext0);
+
+		push();
+		fill(255);
+		textSize(20);
+		textFont(myFont);
+		textAlign(BOTTOM, LEFT);
+		text("Start here", width * 0.8, height * 0.89, width);
+		pop();
+
+
+
+
+	} else if(data.scene == 1) {
+		inpC.hide();
+		buttonFill.hide();
+		buttonFill2.hide();
+
+		background(255);
+		rectMode(CORNER);
+		fill(0);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Choose a shape', 0, 50, width);
+
+
+		push();
+
+		stroke(0);
+		strokeWeight(2);
+
+		rectMode(CENTER);
+
+		fill(255);
+		if(dist(mouseX, mouseY, width * .25, height * .55) < height * .27) {
+			fill(0);
+		}
+		circle(width * .25, height * .57, height * .5);
+
+		fill(255);
+
+		if(dist(mouseX, mouseY, width * .75, height * .55) < height * .27) {
+			fill(0);
+		}
+		square(width * .75, height * .57, height * .5);
+		pop();
+
+
+	} else if(data.scene == 2) {
+		inpC.show();
+		buttonFill.show();
+		buttonFill.mouseClicked(goNext1);
+		background(data.fillColor);
+		//background(188,188,226);
+		buttonFill2.hide();
+
+		rectMode(CORNER);
+		fill(255);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Choose a color', 0, 50, width)
+
+		push();
+		fill(255);
+		textSize(20);
+		textFont(myFont);
+		textAlign(BOTTOM, LEFT);
+		text('Click here to continue', width * 0.7, height * 0.89, width);
+		pop();
+
+
+
+
+	} else if(data.scene == 3) {
+		background(255);
+		inpC.hide();
+		buttonFill.mouseClicked(goNext2);
+		buttonFill2.hide();
+
+		rectMode(CORNER);
+		fill(0);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Write a word', 0, 50, width);
+
+		push();
+		fill(0);
+		textSize(50);
+		textFont(myFont);
+		textAlign(CENTER, CENTER);
+		text(data.freetxt, 0, 0, width, height - 100);
+		pop();
+
+		fill(0);
+		textSize(20);
+		textFont(myFont);
+		textAlign(BOTTOM, LEFT);
+		text('Click here to continue', width * 0.7, height * 0.89, width);
+
+
+
+
+	} else if(data.scene == 4) {
+		background(255);
+		inpC.hide();
+		buttonFill.mouseClicked(goNext3);
+		rectMode(CORNER);
+		//background(255);
+		buttonFill2.hide();
+
+
+		fill(0);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Choose a letter', 0, 50, width + 70)
+
+		for(let i = 0; i < myalphabet1.length; i++) {
+			fill(0);
+			let ts = 70;
+			let offset = 0;
+			if(i >= 13) {
+				offset = 100;
+			}
+
+			let x = i % 13 * ts * 1.2 + width / 5;
+			let y = height / 3 + offset;
+			textFont(myFont);
+			textSize(ts);
+
+			rectMode(CORNER);
+
+			if(dist(mouseX, mouseY, x + ts / 3, y + ts / 2) < ts / 2) {
+				fill(188, 188, 226);
+				textFont(myFont4);
+				if(mouseIsPressed) {
+					background(188, 188, 226);
+					data.letter = myalphabet1[i];
+				}
+			}
+			text(myalphabet1[i], x, y);
+		}
+
+		fill(0);
+		textSize(20);
+		textFont(myFont)
+		textAlign(BOTTOM, LEFT);
+		text('Click here to continue', width * 0.7, height * 0.89, width);
+
+
+
+
+	} else if(data.scene == 5) {
+		background(255);
+		inpC.hide();
+		buttonFill.hide();
+		//	buttonFill.mouseClicked(goNext4);
+		buttonFill2.hide();
+
+		rectMode(CENTER);
+		fill(188, 188, 226);
+		noStroke();
+		rect(width / 2, height / 2 + 15, 1200, 510);
+
+		rectMode(CORNER);
+		fill(0);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Click somewhere inside', 20, 50, width);
+
+		winMouseX = mouseX;
+		winMouseY = mouseY;
+
+
+		if(mouseIsPressed) {
+			/*			fill(188,188,226);
+						noStroke();
+						ellipse(mouseX,mouseY,20,20);*/
+			background(188, 188, 226);
+			fill(0);
+			textSize(80);
+			textFont(myFont);
+			textAlign(CENTER, TOP);
+			text('Click somewhere', 0, 50, width);
+			data.scene = 6;
+		}
+
+
+		/*		fill(0);
+				textSize(20);
+				textFont(myFont)
+				textAlign(BOTTOM, LEFT);
+				text('Click here to continue', width * 0.7, height * 0.89, width);*/
+
+
+
+
+	} else if(data.scene == 6) {
+		background(255);
+		inpC.hide();
+		buttonFill.show();
+		buttonFill.mouseClicked(goNext5);
+		buttonFill2.hide();
+
+		rectMode(CORNER);
+		fill(0);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Choose a number', 0, 50, width);
+
+		textSize(300);
+		text(data.number, width / 2, height / 4);
+		// if the frameCount is divisible by 60, then a second has passed: 
+		if(frameCount % 30 == 0 && data.number > 0 && data.pickNumber) {
+			data.number++;
+			if(data.number > 4) {
+				data.number = 1
+			}
+		}
+
+		fill(0);
+		textSize(20);
+		textFont(myFont)
+		textAlign(BOTTOM, LEFT);
+		text('Click here to continue', width * 0.7, height * 0.89, width);
+
+
+
+	} else if(data.scene == 7) {
+		background(255);
+		inpC.hide();
+		buttonFill.mouseClicked(goNext6);
+		background(188, 188, 226);
+
+		rectMode(CORNER);
+		fill(255);
+		textSize(80);
+		textFont(myFont);
+		textAlign(CENTER, TOP);
+		text('Well done, you made it. Here you go for the final click', 380, 140, width / 2);
+
+
+
+
+	} else if(data.scene == 8) {
+		//background(data.fillColor, 10);
+		drawFinal();
+
+		buttonFill.hide();
+		buttonFill2.show();
+		buttonFill2.mouseClicked(goNext7);
+
+		push();
+		fill(255);
+		textSize(20);
+		textFont(myFont);
+		textAlign(BOTTOM, LEFT);
+
+		text("Start again", width * 0.1, height * 0.89, width);
+		pop();
+	}
+
+
+
+
+	function drawFinal() {
+
+		/*		if(mouseIsPressed){
+					data = dataOriginal;
+				}*/
+
+
+
+		background(data.fillColor);
+
+		push();
+		rectMode(CENTER);
+		if(data.organic == true) {
+			size = map(sin(frameCount * sizeSpeed), -1.0, 1.0, minSize, maxSize);
+			// fill(random(255), random(255), random(255));
+			noFill();
+			stroke(255);
+			strokeWeight(5);
+			ellipse(width / 2, height / 2, size, size);
+		}
+		pop()
+
+		push();
+		if(data.organic == false) {
+			// during even-numbered seconds (0, 2, 4, 6...) add jitter to
+			// the rotation
+			if(second() % 2 === 0) {
+				jitter = random(-0.1, 0.1);
+			}
+			//increase the angle value using the most recent jitter value
+			angle = angle + jitter;
+			//use cosine to get a smooth CW and CCW motion when not jittering
+			let c = cos(angle);
+			//move the shape to the center of the canvas
+			translate(width / 2, height / 2);
+			//apply the final rotation
+			rotate(c);
+			noFill();
+			stroke(255);
+			strokeWeight(5);
+			rect(0, 0, 700, 700);
+		}
+		pop();
+
+
+		if(data.number == 1) {
+			translate();
+			scale(1.5);
+			image(img2, px2, py2);
+		} else if(data.number == 2) {
+			image(img, px, py);
+			image(img2, px2, py2);
+		} else if(data.number == 3) {
+			image(img, px, py);
+			image(img2, px2, py2);
+			image(img3, px3, py3);
+		} else if(data.number == 4) {
+			image(img, px, py);
+			image(img2, px2, py2);
+			image(img3, px3, py3);
+			image(img4, px4, py4);
+		} else if(data.number == 5) {
+			image(img, px, py);
+			image(img2, px2, py2);
+			image(img3, px3, py3);
+			image(img4, px4, py4);
+			image(img5, px5, py5);
+		}
+
+
+		/*		push();
+				rectMode(CENTER);
+				fill(0);
+				strokeWeight(200);
+				//textSize(230);
+				textFont(myFont4);
+				textSize(500),
+				text(data.letter, px9, px9-300);
+				pop();*/
+
+		textSize(160);
+		noStroke();
+
+		rectMode(CORNER);
+		if(data.letter == 'A') {
+			textFont(myFontA);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'B') {
+			textFont(myFontB);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'C') {
+			textFont(myFontC);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'D') {
+			textFont(myFontD);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'E') {
+			textFont(myFontE);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'F') {
+			textFont(myFontF);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'G') {
+			textFont(myFontG);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'H') {
+			textFont(myFontH);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'I') {
+			textFont(myFontI);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'J') {
+			textFont(myFontJ);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'K') {
+			textFont(myFontK);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'L') {
+			textFont(myFontL);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'M') {
+			textFont(myFontM);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'N') {
+			textFont(myFontN);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'O') {
+			textFont(myFontO);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'P') {
+			textFont(myFontP);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'Q') {
+			textFont(myFontQ);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'R') {
+			textFont(myFontR);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'S') {
+			textFont(myFontS);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'T') {
+			textFont(myFontT);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'U') {
+			textFont(myFontU);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'V') {
+			textFont(myFontV);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'W') {
+			textFont(myFontW);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'X') {
+			textFont(myFontX);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'Y') {
+			textFont(myFontY);
+			text(data.freetxt, data.clickX, data.clickY);
+		} else
+		if(data.letter == 'Z') {
+			textFont(myFontZ);
+			text(data.freetxt, data.clickX, data.clickY);
+		}
+
+
+
+	}
+}
+
+
+
+function setColor() {
+	data.fillColor = inpC.color();
+}
+
+
+function keyPressed() {
+	print(keyCode);
+	if(keyCode != 17 && keyCode != 18 && keyCode != 91 && keyCode != 16) {
+		if(keyCode == 13) {
+			data.freetxt += "\n";
+		} else {
+			data.freetxt += key;
+		}
+	}
+
+	if(keyCode == 8) {
+		data.freetxt = "";
+	}
+}
+
+/*	if(keyCode == 32) {
+	data.freetxt = "\n";
+}
+}*/
+
+
+function goNext0() {
+	if(data.scene == 0) {
+		data.scene = 1;
+	}
+}
+
+function goNext1() {
+	if(data.scene == 2) {
+		data.scene = 3;
+	}
+}
+
+function goNext2() {
+	if(data.scene == 3) {
+		data.scene = 4;
+	}
+}
+
+function goNext3() {
+	if(data.scene == 4) {
+		data.scene = 5;
+	}
+}
+
+
+/*function goNext4() {
+	if(data.scene == 5) {
+		data.scene = 6;
+	}
+}
+*/
+
+function goNext5() {
+	if(data.scene == 6) {
+		data.scene = 7;
+	}
+}
+
+function goNext6() {
+	if(data.scene == 7) {
+		data.scene = 8;
+	}
+}
+
+function goNext7() {
+	if(data.scene == 8) {
+		data.scene = 0;
+		data = dataOriginal;
+	}
+}
+
+
+
+
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

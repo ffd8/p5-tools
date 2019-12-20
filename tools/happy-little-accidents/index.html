@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HAPPY LITTLE ACCIDENTS</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+
+var credits = { 
+    "names" : [ 
+        "evelina.hallén" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"lara.hadaddin" 
+    ] 
+    ,"class" : "MDes" 
+    ,"description" : "Interactive drawing tool where no mistakes are made, only happy little accidents." 
+} 
+
+
+//DT_36_FINAL_style_2_20191219102456
+
+let ll = [],
+	tt = [];
+let sliderC, sliderW, sliderSc, sliderSi, sliderRot, sliderUni;
+let sel, llSel;
+let radio, checkSi, checkSou, cl, checkUni;
+let allowCh = true;
+
+function preload() {
+	font = loadFont("data/fonts/SportingGrotesque-Bold.otf");
+}
+
+//  SETUP STARTS  //////////////////////////////////////////////////////////
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	rectMode(CENTER);
+
+	//  DROP DOWN MENU  ////////////////////////
+	sel = createSelect();
+	sel.position(width * 0.03, height * 0.16);
+	sel.option('');
+	sel.changed(selDrawing);
+	sel.style('font-family', 'Helvetica');
+	sel.style('font-size', '15px');
+	sel.style('width', '135px');
+	sel.style('background-color', '#fff');
+
+	//  COLOR SLIDER  ////////////////////////////
+	colorMode(HSB);
+	sliderC = createSlider(0, 340, 0, 10);
+	sliderC.position(width * 0.03, height * 0.25);
+	sliderC.input(changeCol);
+	sliderC.style('width', '130px');
+	sliderC.style('height', '3px');
+	sliderC.style('appearance', 'none');
+	sliderC.style('background', '#000');
+	sliderC.style('border: 1px solid #fff');
+	sliderC.style('-webkit-appearance: none');
+	sliderC.style('outline: none');
+
+	//  STROKE WEIGHT SLIDER  ////////////////////
+	sliderW = createSlider(1, 30, 5);
+	sliderW.position(width * 0.03, height * 0.34);
+	sliderW.input(changeWeight);
+	sliderW.style('height', '3px');
+	sliderW.style('appearance', 'none');
+	sliderW.style('background', '#000');
+	sliderW.style('border: 1px solid #fff');
+	sliderW.style('-webkit-appearance: none');
+	sliderW.style('outline: none');
+
+	//  STROKE SCALE SLIDER /////////////////////////
+	sliderSc = createSlider(1.0, 5.0, 1.0, 0.1);
+	sliderSc.position(width * 0.03, height * 0.43);
+	sliderSc.input(changeScale);
+	sliderSc.style('height', '3px');
+	sliderSc.style('appearance', 'none');
+	sliderSc.style('background', '#000');
+	sliderSc.style('border: 1px solid #fff');
+	sliderSc.style('-webkit-appearance: none');
+	sliderSc.style('outline: none');
+
+
+	//  ROTATION SLIDER /////////////////////////
+	sliderRot = createSlider(-10, 10, 0, 0.01);
+	sliderRot.position(width * 0.03, height * 0.61);
+	sliderRot.input(changeRot);
+	sliderRot.style('height', '3px');
+	sliderRot.style('appearance', 'none');
+	sliderRot.style('background', '#000');
+	sliderRot.style('border: 1px solid #fff');
+	sliderRot.style('-webkit-appearance: none');
+	sliderRot.style('outline: none');
+
+	//  MOTION SLIDER  /////////////////////////////
+	sliderSi = createSlider(1, 10, 1);
+	sliderSi.position(width * 0.05, height * 0.70);
+	sliderSi.input(changeSi);
+	sliderSi.hide();
+	sliderSi.style('height', '3px');
+	sliderSi.style('appearance', 'none');
+	sliderSi.style('background', '#000');
+	sliderSi.style('border: 1px solid #fff');
+	sliderSi.style('-webkit-appearance: none');
+	sliderSi.style('outline: none');
+
+	//  RADIO BUTTONS  /////////////////////////////
+	radioB = createRadio();
+	radioB.option(' ', 'b').checked = true;
+	radioB.option(' ', 'r');
+	radioB.option(' ', 'e');
+	radioB.option(' ', 'l');
+	radioB.position(width * 0.03, height * 0.52);
+	radioB.input(updateRadioB);
+
+
+	//  CHECKBOX SINE  /////////////////////////////
+	checkSi = createCheckbox('', false);
+	checkSi.position(width * 0.03, height * 0.70);
+	checkSi.input(checkSi2);
+
+
+	//  CHECKBOX SOUND  /////////////////////////////
+	checkSou = createCheckbox('', false);
+	checkSou.position(width * 0.03, height * 0.79);
+	checkSou.input(changeSou);
+
+	// PARTY MODE CHECKBOX
+	checkUni = createCheckbox('', false);
+	checkUni.position(width * 0.03, height * 0.88);
+	//checkUni.input(uniButt);
+
+	//  PARTY MODE SLIDER  /////////////////////////////
+	sliderUni = createSlider(0.01, 0.1, 0.01, 0.01);
+	sliderUni.position(width * 0.05, height * 0.88);
+	sliderUni.hide();
+
+	// CLEAR BUTTON
+	cl = createButton("CLEAR");
+	cl.position(width * 0.03, height * 0.94);
+	cl.style('width', '135px');
+	cl.style('height', '25px');
+	cl.style('font-family', 'Sporting Grotesque');
+	cl.style('font-weight', 'Bold');
+	cl.style('padding', '4px');
+	cl.mousePressed(clearSketch);
+
+
+	setupAudio();
+}
+
+
+//  DRAW STARTS  /////////////////////////////////////////////////////////////
+
+function draw() {
+	/* audio vars: amp, ampEase, fft, waveform */
+	updateAudio();
+	background(0);
+	noFill();
+	stroke(255);
+
+	// TOOL BOX CONTAINER ///////////////////
+	push();
+	rectMode(CORNER);
+	strokeWeight(3);
+	//rect(width * 0.819, height * 0.004, width * 0.18, height * 0.99);
+	rect(width * 0.0029, 60, width * 0.18, height-70);
+	pop();
+
+	//  TEXT IN TOOL BAR  ///////////////////
+	push();
+	noStroke();
+	fill(255);
+	textSize(12);
+	textFont('Sporting Grotesque');
+	textAlign(LEFT);
+	text("CHOOSE LINE", width * 0.03, height * 0.15);
+	text("STROKE COLOR", width * 0.03, height * 0.24);
+	text("STROKE WEIGHT", width * 0.03, height * 0.33);
+	text("SCALE", width * 0.03, height * 0.42);
+	text("CHANGE LINE", width * 0.03, height * 0.51);
+	text("ROTATION", width * 0.03, height * 0.60);
+	text("MOTION", width * 0.03, height * 0.69);
+	//text("", width * 0.8, height * 0.7);
+	text("SOUND", width * 0.03, height * 0.78);
+	text("PARTY MODE", width * 0.03, height * 0.865);
+	pop();
+
+	push();
+	fill(255);
+	noStroke();
+	textAlign(LEFT);
+	textSize(20);
+	textFont('Sporting Grotesque');
+	// textStyle(BOLD);
+	// text("HAPPY LITTLE \nACCIDENTS", width * 0.03, height * 0.07);
+	pop();
+
+	// DISPLAY CLASS DRAWLINE
+	for(let l of ll) {
+		l.display();
+	}
+
+	if(checkUni.checked()) {
+		sliderUni.show();
+		sliderC.value(abs(sin(frameCount * .9 * sliderUni.value())) * 340);
+		sliderW.value(abs(sin(frameCount * sliderUni.value())) * 30);
+		sliderSc.value(abs(sin(frameCount * 0.05 * sliderUni.value())) * 5.0);
+		sliderRot.value((sin(frameCount * 2 * sliderUni.value())) * 10);
+		checkSou.checked(true);
+		changeCol();
+		changeWeight();
+		changeScale();
+		changeRot();
+		changeSou();
+	}
+
+	// DRAW ENDS
+}
+
+
+function clearSketch() {
+	console.log('fuck');
+	clear();
+	sel.html('');
+	ll = [];
+	//set sliders to default
+	sliderC.value(0);
+	sliderW.value(0);
+	sliderSc.value(0);
+	sliderSi.value(0);
+	sliderRot.value(0);
+	sliderUni.value(0);
+	checkSou.checked(false);
+	checkSi.checked(false);
+	checkUni.checked(false);
+	//checkSi.checked()=!checkSi.checked();
+	//radioB.value(ll[llSel].r);
+
+
+
+}
+
+function mousePressed() {
+	if(mouseX > width * 0.20) {
+		ll.push(new DrawLine());
+		llSel = ll.length - 1;
+	}
+}
+
+function mouseDragged() {
+	if(mouseX > width * 0.20) {
+		//talking to the latest creation in the ll array
+		ll[llSel].addPoint();
+	}
+}
+
+function selDrawing() {
+	allowCh = false;
+
+	llSel = sel.value();
+	// update all sliders-checkboxes to llSel.values
+
+	sliderC.value(ll[llSel].col);
+	sliderW.value(ll[llSel].m);
+	sliderSc.value(ll[llSel].sc);
+	sliderSi.value(ll[llSel].si);
+	sliderRot.value(ll[llSel].rot);
+	checkSi.value(ll[llSel].cSi);
+	radioB.value(ll[llSel].r);
+	checkSou.value(ll[llSel].sou);
+	//checkUni.value(ll[llSel])
+
+	allowCh = true;
+
+}
+
+function changeCol() {
+	if(allowCh) {
+		//talking to the selected drawing and updating the color to what slider value is currently
+		ll[llSel].col = sliderC.value();
+
+	}
+}
+
+function updateRadioB() {
+	if(allowCh) {
+		ll[llSel].r = radioB.value();
+	}
+}
+
+function changeWeight() {
+	if(allowCh) {
+		ll[llSel].m = sliderW.value();
+	}
+}
+
+function changeScale() {
+	if(allowCh) {
+		ll[llSel].sc = sliderSc.value();
+	}
+}
+
+function changeSi() {
+	if(allowCh) {
+		sliderSi.show();
+		ll[llSel].si = sliderSi.value();
+	}
+}
+
+
+function checkSi2() {
+	if(allowCh) {
+		sliderSi.show();
+		ll[llSel].cSi = checkSi.value();
+	}
+}
+
+
+function changeSou() {
+	if(allowCh) {
+		ll[llSel].sou = checkSou.value();
+	}
+}
+
+function changeRot() {
+	if(allowCh) {
+		ll[llSel].rot = sliderRot.value();
+	}
+}
+
+class DrawLine {
+	constructor() {
+		this.id = ll.length;
+		this.points = [];
+		this.col = sliderC.value();
+		this.m = sliderW.value();
+		this.sc = sliderSc.value();
+		this.si = sliderSi.value();
+		this.cSi = checkSi.value();
+		this.r = radioB.value();
+		this.sou = checkSou.value();
+		this.rot = sliderRot.value(); // use slider
+		// set drawings 0, 0 origin on first mousePress
+		this.origin = createVector(mouseX, mouseY)
+
+		//this.f = 100
+		//this.g = 100
+		//this.sine = sliderSin.value();
+		//this.s = sin(frameCount * .01);
+		//this.smapX = map(this.s, -1, 1, 0, width);
+		//this.smapY = map(this.s, -1, 1, 0, height);
+
+		// the first value is the text, second value that html reads
+		sel.option('Line ' + this.id, this.id);
+		sel.value(this.id);
+	}
+
+	// whenever drag mouse add new points to this.points array
+	addPoint() {
+		// calculate offset of mouseX/mouseY to custom origin
+		this.points.push(createVector(mouseX - this.origin.x, mouseY - this.origin.y));
+	}
+
+
+	display() {
+		push();
+
+		// use custom 0, 0 of class element
+		translate(this.origin.x, this.origin.y);
+		rotate(radians(frameCount * this.rot)) // make slider -2, 2
+		scale(this.sc);
+		stroke(this.col, 100, 100, 100);
+		strokeWeight(this.m);
+
+		// know its the active drawing
+		//	if(this.id == llSel && frameCount % 10 == 0) {
+		//		noStroke()
+		//	}
+
+
+		//////  IF ANY OF THE RADIO BUTTONS ARE SELECTED:  /////////////////////////////////
+
+		// BUTTON 1 RECT
+
+		if(this.r == 'b') {
+			beginShape();
+			for(let p of this.points) {
+				let h = p.x
+				let j = p.y
+
+				if(checkSi.checked()) {
+					let s = map(sin(frameCount * 0.05), -1, 1, random(100, 50), random(200, 250));
+					h += s * this.si * .1;
+					j += s * this.si * .1;
+				}
+
+				if(checkSou.checked()) {
+					h += amp;
+					j += amp;
+				}
+				vertex(h, j);
+			}
+			endShape();
+		}
+
+		// BUTTON 2 RECT
+
+		if(this.r == 'r') {
+			for(let g of this.points) {
+				let tempSize = 100; // better than 100????
+
+				if(checkSi.checked()) {
+					let s = map(sin(frameCount * 0.05), -1, 1, random(100, 50), random(200, 250));
+					tempSize = s * this.si;
+				}
+
+				if(checkSou.checked()) {
+					tempSize += amp;
+				}
+
+				rect(g.x, g.y, tempSize, tempSize);
+			}
+		}
+
+		/*
+		if(this.r == 'r' && !checkSi.checked() && !checkSou.checked()) {
+			for(let g of this.points) {
+				//	for(let i = 0; i < this.points.length; i++) {
+				rect(g.x, g.y, 100, 100);
+			}
+		}
+		*/
+
+		// BUTTON 3 ELLIPSE
+		if(this.r == 'e') {
+			let i = 0;
+			for(let g of this.points) {
+				let tempSize = 100; // better than 100????
+
+				if(checkSi.checked()) {
+					let s = map(sin(frameCount * 0.05), -1, 1, random(100, 50), random(200, 250));
+					tempSize = s * this.si;
+				}
+
+				if(checkSou.checked()) {
+					tempSize += amp;
+				}
+
+				ellipse(g.x, g.y, tempSize, tempSize);
+				i++;
+			}
+		}
+
+		// BUTTON 4 LINES
+		if(this.r == 'l') {
+			let i = 0;
+			for(let g of this.points) {
+				let tempSize = 100; // better than 100????
+
+				if(checkSi.checked()) {
+					let s = map(sin(frameCount * 0.05), -1, 1, random(100, 50), random(200, 250));
+					tempSize = s * this.si;
+				}
+
+				if(checkSou.checked()) {
+					tempSize += amp;
+				}
+
+				line(g.x, g.y, g.x + tempSize, g.y + tempSize);
+				i++;
+			}
+		}
+
+		pop();
+		// CLOSE DISPLAY
+	}
+
+	//CLOSE CLASS
+}
+
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+
+/* AUDIO INIT */
+let mic, fftRaw, fft, waveform, amp = 0.0,
+	ampStereo = {
+		l: 0.0,
+		r: 0.0
+	},
+	ampEase = 0.0,
+	numBins = 512,
+	bands = 12;
+
+function setupAudio() {
+	userStartAudio();
+	mic = new p5.AudioIn();
+	mic.start();
+	fftRaw = new p5.FFT(0.75, numBins);
+	fftRaw.setInput(mic);
+}
+
+function updateAudio() {
+	fftRaw.analyze();
+	amp = mic.getLevel() * 1000; // average mixed amplitude
+	ampStereo.l = mic.amplitude.getLevel(0) * 500; // average left amplitude
+	ampStereo.r = mic.amplitude.getLevel(1) * 500; // average right amplitude
+	ampEase = ease(amp, ampEase, 0.075); // smooth 'amp'
+	waveform = fftRaw.waveform(); // array (-1, 1)
+	fft = fftRaw.logAverages(fftRaw.getOctaveBands(bands)); // array (0, 255)
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

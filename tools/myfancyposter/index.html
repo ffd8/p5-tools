@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>#1_final final poster </title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//#1_final final poster 
+
+var credits = { 
+    "names" : [ 
+        "alessandra.di santo" 
+        ,"noemi.parisi" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "This is a fancy poster creator which creats unique compositions: It's for beginners to get into poster design and for experienced designers to find new inspiration. The patterns are created based on the letters in the title but are randomly positioned. Because we don't want to take all responisibility the sliders give you some control over your design." 
+} 
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+}
+
+//poster format
+let w = 40000,
+	h = 60000
+let scl = .99
+
+let keyshapes = [];
+
+//background
+let bgcolor;
+let button;
+
+//move Circle
+let circleMove;
+let buttonCircle
+
+//text field
+let input
+
+// to create labels
+let label
+
+//sliders
+
+let sliderColor
+let sliderSaturation
+let sliderBrightness
+let sliderColor2
+let sliderSaturation2
+let sliderBrightness2
+
+
+let sliderLoopyCount
+let sliderLoopyGap
+let sliderLoopyCount2
+let sliderLoopyGap2
+
+let sliderSpeed1
+let sliderSpeed2
+
+let sliderMoveWidth
+let sliderMoveHeight
+let sliderMoveWidth2
+let sliderMoveHeight2
+
+let sliderTextWidth
+let sliderTextHeight
+let sliderTextSize
+
+let sliderTextColor
+let sliderTextSaturation
+let sliderTextBrightness
+
+let sliderTextSpacing
+
+let sliderTextRot
+
+function setup() {
+	createCanvas(windowHeight * .7, windowHeight * .7 * 1.46);
+	rectMode(CENTER);
+	angleMode(DEGREES);
+
+	background(230); //background for whole window
+	changeColor() //background for poster
+
+	// to position sliders and lables
+	let guiX = windowWidth * .52;
+	let guiY = windowHeight * .09;
+
+	//sliders for text
+	sliderTextColor = createSlider(0, 100, 50, .01);
+	sliderTextColor.position(guiX, guiY);
+
+	sliderTextSaturation = createSlider(0, 100, 60, .01);
+	sliderTextSaturation.position(guiX, guiY * 1.3);
+
+	sliderTextBrightness = createSlider(0, 100, 80, .01);
+	sliderTextBrightness.position(guiX, guiY * 1.6);
+
+	sliderTextSize = createSlider(10, 1000, 100, .01);
+	sliderTextSize.position(guiX, guiY * 2);
+
+	sliderTextHeight = createSlider(0, height, height * .5, .01);
+	sliderTextHeight.position(guiX, guiY * 2.4);
+
+	sliderTextWidth = createSlider(0, width, width * 0.54, .01);
+	sliderTextWidth.position(guiX, guiY * 2.7);
+
+	sliderTextRot = createSlider(-180, 180, 0, .01);
+	sliderTextRot.position(guiX, guiY * 3);
+	
+	sliderTextSpacing = createSlider (0,700,100.01);
+	sliderTextSpacing.position(guiX, guiY * 3.3);
+	
+
+	//labels for textsliders
+	label = createDiv("TEXT")
+	label.position(guiX * 1.23, guiY * .2, 70)
+	label.style('color', '#000')
+	label.style('font-size', '12pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("color")
+	label.position(guiX * 1.23, guiY, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("saturation")
+	label.position(guiX * 1.23, guiY * 1.3, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("brightness")
+	label.position(guiX * 1.23, guiY * 1.6, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("size")
+	label.position(guiX * 1.23, guiY * 2, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("move: up - down")
+	label.position(guiX * 1.23, guiY * 2.4, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+
+	label = createDiv("move: left - right")
+	label.position(guiX * 1.23, guiY * 2.7, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("rotate")
+	label.position(guiX * 1.23, guiY * 3, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+	
+		label = createDiv("line spacing")
+	label.position(guiX * 1.23, guiY * 3.3, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	//sliders for circle
+	sliderColor = createSlider(0, 100, 70, .01);
+	sliderColor.position(guiX * 1.2, guiY * 4.7);
+
+	sliderSaturation = createSlider(0, 100, 70, .01);
+	sliderSaturation.position(guiX * 1.2, guiY * 5);
+
+	sliderBrightness = createSlider(0, 100, 70, .01);
+	sliderBrightness.position(guiX * 1.2, guiY * 5.3);
+
+	sliderColor2 = createSlider(0, 100, 70, .01);
+	sliderColor2.position(guiX * 1, guiY * 4.7);
+
+	sliderSaturation2 = createSlider(0, 100, 70, .01);
+	sliderSaturation2.position(guiX * 1, guiY * 5);
+
+	sliderBrightness2 = createSlider(0, 100, 10, .01);
+	sliderBrightness2.position(guiX * 1, guiY * 5.3);
+
+	sliderLoopyCount = createSlider(.1, 100, 20, .01);
+	sliderLoopyCount.position(guiX * 1, guiY * 5.7);
+
+	sliderLoopyCount2 = createSlider(.1, 100, 10, .01);
+	sliderLoopyCount2.position(guiX * 1.2, guiY * 5.7);
+
+	sliderLoopyGap = createSlider(1, 100, 10, .01);
+	sliderLoopyGap.position(guiX * 1, guiY * 6);
+
+	sliderLoopyGap2 = createSlider(1, 100, 10, .01);
+	sliderLoopyGap2.position(guiX * 1.2, guiY * 6);
+
+
+	sliderSpeed1 = createSlider(0, 300, 200, .01);
+	sliderSpeed1.position(guiX * 1, guiY * 6.4);
+
+	sliderSpeed2 = createSlider(0, 300, 100, .01);
+	sliderSpeed2.position(guiX * 1.2, guiY * 6.4);
+
+	sliderMoveHeight = createSlider(0, 100, 20, .5);
+	sliderMoveHeight.position(guiX * 1.2, guiY * 6.7);
+
+	sliderMoveHeight2 = createSlider(0, 100, 50, .5);
+	sliderMoveHeight2.position(guiX * 1, guiY * 6.7);
+
+	sliderMoveWidth = createSlider(0, 100, 500, .01);
+	sliderMoveWidth.position(guiX * 1.2, guiY * 7);
+
+	sliderMoveWidth2 = createSlider(0, 100, 100, .01);
+	sliderMoveWidth2.position(guiX * 1, guiY * 7);
+
+
+	//labels for circle sliders
+	label = createDiv("CIRCLES")
+	label.position(guiX * 1.41, guiY * 4, 70)
+	label.style('color', '#000')
+	label.style('font-size', '12pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("color")
+	label.position(guiX * 1.41, guiY * 4.7, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("saturation")
+	label.position(guiX * 1.41, guiY * 5, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("brightness")
+	label.position(guiX * 1.41, guiY * 5.3, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("size")
+	label.position(guiX * 1.41, guiY * 5.7, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("space")
+	label.position(guiX * 1.41, guiY * 6, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("speed")
+	label.position(guiX * 1.41, guiY * 6.4, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("move in height")
+	label.position(guiX * 1.41, guiY * 6.7, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	label = createDiv("move in width")
+	label.position(guiX * 1.41, guiY * 7, 70)
+	label.style('color', '#000')
+	label.style('font-size', '8pt');
+	label.style('font-family', 'sans-serif')
+
+	//button to change backgroudcolor
+	button = createButton("change background color");
+	button.position(guiX, guiY * 7.6);
+	button.mousePressed(changeColor);
+
+	//input for text
+	input = createInput("type your fancy title")
+	input.position(guiX, guiY * .6);
+	input.input(breakRect);
+
+
+	colorMode(HSB, 100);
+}
+
+
+function draw() {
+
+	background(bgcolor);
+
+	//text
+	push();
+	rotate(sliderTextRot.value());
+	textSize(sliderTextSize.value());
+	fill(sliderTextColor.value(), sliderTextSaturation.value(), sliderTextBrightness.value());
+	noStroke();
+	textLeading(sliderTextSpacing.value());
+	text(input.value(), sliderTextWidth.value(), sliderTextHeight.value(), windowHeight * .7, windowHeight * .7 * 1.4);
+	pop();
+
+	//looping Circles
+	let osc = sin(frameCount * sliderMoveWidth2.value());
+	let osc2 = sin(frameCount * sliderMoveHeight2.value());
+	let osc3 = sin(frameCount * sliderMoveWidth.value());
+	let osc4 = sin(frameCount * sliderMoveHeight.value());
+
+	push();
+	noFill();
+	stroke(sliderColor.value(), sliderSaturation.value(), sliderBrightness.value());
+	strokeWeight(0.5);
+	loopy(width * .55 + osc * sliderSpeed1.value(), height * .5 + osc2 * sliderSpeed1.value(), sliderLoopyCount.value(), sliderLoopyGap.value());
+	pop();
+
+	push();
+	noFill();
+	stroke(sliderColor2.value(), sliderSaturation2.value(), sliderBrightness2.value());
+	strokeWeight(0.5);
+	loopy(width * .5 + osc3 * sliderSpeed2.value(), height * .5 + osc4 * sliderSpeed2.value(), sliderLoopyCount2.value(), sliderLoopyGap2.value());
+	pop();
+
+	//for all keys
+	for(let ks of keyshapes) {
+		noFill();
+		stroke(255)
+		rect(ks.x, ks.y, ks.z, ks.z);
+	}
+
+	//special effects on independent keys
+	push();
+	if(key.toLowerCase() == "a") {
+		noFill();
+		stroke(255);
+		strokeWeight(1);
+		rotate(random(0, 180));
+		rect(random(0, width), random(0, height), random(5, 500), random(1, 100));
+		rect(random(width), random(height), 5, 5);
+		pop();
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "b") {
+			noFill();
+			rotate(frameCount);
+			stroke(255)
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "c") {
+			noFill();
+			rotate(frameCount * 180);
+			stroke(255)
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "d") {
+			noFill();
+			stroke(0)
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "e") {
+			translate(width / 2, height / 2);
+			noFill();
+			rotate(frameCount / 2 % 90);
+			stroke(255);
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "f") {
+			translate(width / 2, height / 2);
+			noFill();
+			strokeWeight(frameCount * 20 % random(.1, 10));
+			stroke(255);
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+	if(key.toLowerCase() == "g") {
+		noFill();
+		stroke(sliderColor2.value(), sliderSaturation2.value(), sliderBrightness2.value());
+		strokeWeight(0.5);
+		loopy(width + osc2 * 500, height * .5 + osc3 * 500, 10, 5);
+	}
+	if(key.toLowerCase() == "h") {
+		noFill();
+		stroke(255);
+		strokeWeight(0.5);
+		loopy(width + osc2 * 500, height * .5 + osc3 * 500, 10, 5);
+	}
+
+	if(key.toLowerCase() == "i") {
+		noFill();
+		stroke(255);
+		strokeWeight(0.5);
+		translate(10, 10);
+		rotate(frameCount * .005);
+		loopy(width + osc2 * 100, height * .5 + osc3 * 500, 25, 5);
+	}
+
+	push();
+	if(key.toLowerCase() == "k") {
+		noFill();
+		stroke(255);
+		rotate(frameCount * 10);
+		strokeWeight(1);
+		rect(width / 2, height / 2, 50, 50);
+		pop();
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "l") {
+			noFill();
+			strokeWeight(1)
+			stroke(random(255), random(255), random(255));
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "m") {
+			rotate(osc2)
+			noFill();
+			strokeWeight(1)
+			stroke(random(255), random(25), random(255));
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "n") {
+			rotate(osc2)
+			noFill();
+			strokeWeight(1)
+			stroke(random(100, 255), random(25), random(100, 255));
+			rect(ks.x, ks.y, 5, 5);
+		}
+	}
+
+
+	push();
+	if(key.toLowerCase() == "p") {
+		noFill();
+		stroke(255);
+		strokeWeight(1);
+		rotate(random());
+		ellipse(random(0, width), random(0, height), random(5, 500), random(1, 100));
+		line(random(0, width), random(0, height), random(0, width), random(0, height));
+		pop();
+	}
+
+	if(key.toLowerCase() == "r") {
+		stroke(random(100, 255), random(20), random(100, 255));
+		line(random(width), random(height), width * .15, height * .15);
+	}
+
+	push();
+	if(key.toLowerCase() == "t") {
+		noFill();
+		stroke(255);
+		strokeWeight(1);
+		rotate(random());
+		ellipse(random(0, width), random(0, height), random(5, 500), random(1, 100));
+		ellipse(random(width), random(height), 5, 5);
+		pop();
+	}
+
+	push();
+	if(key.toLowerCase() == "u") {
+		noFill();
+		stroke(255);
+		strokeWeight(1);
+		rect(random(0, width), random(0, height), random(10, 50), random(10, 50));
+		pop();
+	}
+
+
+	for(let ks of keyshapes) {
+		if(key.toLowerCase() == "x") {
+			fill(random(255), random(1, 10), random(255));
+			rect(ks.x, ks.y, ks.z, ks.z);
+		}
+	}
+
+}
+
+//FUNCTIONS
+
+//function to change backgroundcolor
+function changeColor() {
+	bgcolor = color(random(250), random(250), random(250), 5);
+}
+
+//function for looping circles
+function loopy(xPos, yPos, loopyCount, loopyGap) {
+	for(let i = 0; i < loopyCount; i++) {
+		ellipse(xPos, yPos, i * loopyGap);
+	}
+}
+
+//function for rect connected with text
+function breakRect() {
+	let coord = createVector(random(width), random(height), random(50, 100));
+	keyshapes.push(coord)
+
+	// careful.... while is dangerous
+	while(keyshapes.length > input.value().length) {
+		keyshapes = keyshapes.splice(1) //reacts to delete, so no more patterns than text 
+	}
+
+}
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

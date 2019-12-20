@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mandela_FINALEEE_OHOO_20191219095213</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//Mandela_FINALEEE_OHOO_20191219095213
+
+var credits = { 
+    "names" : [ 
+        "Barbara.Foltran" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"Frances.Lucas" 
+        ,"Elina.Karitonov" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "Generating new mandala patterns step by step. Move the sliders to change form, colour or size. And if you want to add, delete or reset your sketch push the buttons provided for this." 
+} 
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+let roses = [];
+
+let myText;
+let button;
+let buttonReset;
+let buttonAdd;
+let slider;
+let sliderFill;
+let sliderSize;
+let sliderWeight;
+let sliderRotate;
+let currentRose;
+
+
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+
+	rectMode(CENTER);
+	colorMode(HSB);
+
+	slider = createSlider(0, 10, 3, 0.1)
+	slider.position(width / 10, height/8);
+	slider.input(rosesForm); // slider changed
+	let myDiv = createDiv("Form").position(width / 10-80, height/8).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	sliderFill = createSlider(0, 1000, 500);
+	sliderFill.position(width / 10, height/6)
+	sliderFill.input(roseColor)
+	let myDiv2 = createDiv("Colour").position(width / 10-80, height/6).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	sliderSize = createSlider(0, 1000, 500);
+	sliderSize.position(width / 10, height/4.8)
+	sliderSize.input(roseSize)
+	let myDiv3 = createDiv("Size").position(width / 10-80, height/4.8).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+
+	sliderWeight = createSlider(1, 10, 50);
+	sliderWeight.position(width / 10, height/4)
+	sliderWeight.input(roseWeight)
+	let myDiv4 = createDiv("Weight").position(width / 10-80, height/4).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+	
+	sliderRotate = createSlider(0, 360, 180);
+	sliderRotate.position(width / 10, height/3.4)
+	sliderRotate.input(roseRotate)
+	let myDiv5 = createDiv("Rotate").position(width / 10-80, height/3.4).style("font-size", "12pt").style("color", "#fff").style('font-family', 'sans-serif');
+	
+	roses.push(new Rose());
+
+	button = createButton('Erase Last');
+	button.position(width / 10, 300);
+	button.mousePressed(eraseForm);
+
+	buttonAdd = createButton("Add");
+	buttonAdd.position(width / 10, 340);
+	buttonAdd.mousePressed(addForm);
+
+	buttonReset = createButton('Reset');
+	buttonReset.position(width / 10, 380);
+	buttonReset.mousePressed(resetSketch);
+}
+
+
+function draw() {
+	background(0);
+	translate(width / 2, height / 2);
+
+	for(let rose of roses) {
+		rose.show();
+	}
+}
+
+
+function addForm() {
+	roses.push(new Rose());
+
+}
+
+function resetSketch() {
+	console.log(roses.length);
+	roses = [];
+}
+
+function eraseForm() {
+	roses.splice(roses.length - 1, 1);
+}
+
+function rosesForm() {
+	currentRose = roses[roses.length - 1];
+	currentRose.k = slider.value();
+}
+
+function roseColor() {
+	currentRose = roses[roses.length - 1];
+	currentRose.strokeColor = sliderFill.value();
+}
+
+function roseSize() {
+	currentRose = roses[roses.length - 1];
+	currentRose.radius = sliderSize.value();
+}
+
+function roseWeight() {
+	currentRose = roses[roses.length - 1];
+	currentRose.strokeWeight = sliderWeight.value();
+}
+
+function roseRotate() {
+	currentRose = roses[roses.length - 1];
+	currentRose.rotate = sliderRotate.value();
+}
+
+class Rose {
+	constructor() {
+		this.k = 3;
+		slider.value(this.k);
+		this.strokeColor = 50;
+		sliderFill.value(this.strokeColor);
+		this.radius = 100;
+		sliderSize.value(this.radius);
+		this.strokeWeight = 1;
+		sliderWeight.value(this.strokeWeight);
+		this.rotate = radians(frameCount);
+		sliderRotate.value(this.rotate);
+	}
+
+	show() {
+		push()
+		beginShape();
+		stroke(this.strokeColor, 100, 100);
+		noFill();
+		strokeWeight(this.strokeWeight, 1, 10);
+		rotate(this.rotate);
+		currentRose = roses[roses.length - 1]
+		//rotate(this.rotate, 360);
+		for(var a = 0; a < TWO_PI * 10; a += 0.01) {
+			var r = this.radius * cos(this.k * a);
+			var x = r * cos(a);
+			var y = r * sin(a);
+
+			vertex(x, y);
+		}
+		endShape(CLOSE);
+		pop()
+	}
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>AUB_HAIKU_YOUDO_V2_D25_001</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript" src="scripts/syllable.min.js"></script>
+
+<script type="text/javascript">
+//AUB_HAIKU_YOUDO_V2_D25_001
+
+let bkd, bkdOp, sliderCol;
+let txtPtsChk, waveFrmChk, ellipseChk, waveColChk, videoChk;
+let filterSel, filterType;
+let font, img;
+let typepoints = [];
+let haikuz = [];
+let inputs = [];
+let layer, layer2, hLayer;
+let loadScripts = [
+	"data/scripts/syllable.min.js"
+];
+let capture;
+let myCapture;
+let gfx;
+
+var credits = { 
+    "names" : [ 
+        "aubrey.pohl" 
+        ,"zubin.lakra" 
+    ] 
+    ,"class" : "MDes" 
+    ,"description" : "Haiku you do, you do the haiku! Remember, a haiku is structred by 1st line: 5 syllables, 2nd line: 7 syllables, 3rd line: 5 syllables. If a bar is flashing behind your text, you need to add or subtract syllables! Enjoy :)"
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function preload() {
+	font = loadFont("fonts/RobotoCondensed-Bold.ttf");
+
+	img = loadImage('https://i.imgur.com/HX8M1ZI.png');
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function initCaptureDevice() {
+	try {
+		myCapture = createCapture(VIDEO);
+		myCapture.size(320, 240);
+		myCapture.hide();
+		console.log(
+			'[initCaptureDevice] capture ready. Resolution: ' +
+			myCapture.width + ' ' + myCapture.height
+		);
+	} catch (_err) {
+		console.log('[initCaptureDevice] capture error: ' + _err);
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+	background(0);
+	layer = createGraphics(windowWidth, windowHeight);
+	layer2 = createGraphics(650, 650);
+	//hLayer = createGraphics(650, 650);
+
+	initCaptureDevice(); // and access to the camera
+	gfx = createGraphics(650, 650);
+	gfx.pixelDensity(0.01);
+	noStroke();
+	fill(255);
+	frameRate(10);
+
+	setupAudio();
+	rectMode(CENTER);
+	sliderFunc();
+	checkBoox();
+	classSet();
+
+
+
+}
+
+
+
+// should be toolName - not your actual tool name...
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    //let filename = haiku-u-du + '_' + timestamp + '.png'; 
+    filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    let c = get(width/3.6, height/20, 645, 645);
+	c.save(filename); // needed to be c.save not c(save)
+} 
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function sliderFunc() {
+
+	// sliders
+
+	sliderBkdOp = createSlider(0, 100, 50);
+	sliderBkdOp.position(width / 20, height / 14);
+	
+	sliderCol = createSlider(0, 255, 255);
+	sliderCol.position(width / 20, height / 10);
+
+	filterSel = createSelect();
+	filterSel.position(width / 8, height / 2);
+	filterSel.option(GRAY);
+	filterSel.option(POSTERIZE);
+	filterSel.option(INVERT);
+
+	filterType = createSelect();
+	filterType.position(width / 20, height / 2);
+	filterType.option('points');
+	filterType.option('vertex');
+	filterType.option('fill');
+	filterType.option('morph');
+	filterType.option('probe');
+
+
+}
+
+
+
+function classSet() {
+
+	//new TypePoints(text x, text y, ext, input y, syllable count, syl indicador y);
+	// for(let tp of typepoints) {
+	// 	tp.genType();
+	// }
+
+
+	typepoints.push(new TypePoints(width / 3.5, height / 4.1, "hi, haiku you do?", height / 7, 5, height / 4.4));
+	typepoints.push(new TypePoints(width / 3.5, height / 2.02, "you do the haiku, wooo!", height / 5.5, 7, height / 2.1));
+	typepoints.push(new TypePoints(width / 3.5, height / 1.36, "in a haiku mood", height / 4.52, 5, height / 1.4));
+
+
+	haikuz.push(new HaikuForms(height / 4, height / 5 + ampEase));
+	haikuz.push(new HaikuForms(height / 2, height / 2 + ampEase));
+	haikuz.push(new HaikuForms(height / 1.35, height / 5 + ampEase));
+	
+	for(let i = 0; i< typepoints.length; i++){
+		inputs.push(createInput(typepoints[i].txt));
+		inputs[i].position(width / 20, typepoints[i].y2);
+		// this.inputL = createInput(this.txt);
+		// this.inputL.position(width / 1.23, this.y2);
+		inputs[i].size(200, 15);
+		//print(this.inputL)
+		inputs[i].input(function(){
+			typepoints[i].txt = this.value();
+			typepoints[i].genType(); 
+		});
+	}
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function checkBoox() {
+
+
+	txtPtsChk = createCheckbox('show text', true);
+	txtPtsChk.position(width / 20, height / 3.5);
+	txtPtsChk.style('color', '#ffffff');
+
+	waveFrmChk = createCheckbox('show audio waves', false);
+	waveFrmChk.position(width / 20, height / 3.1);
+	waveFrmChk.style('color', '#ffffff');
+
+	waveColChk = createCheckbox('audio wave color', false);
+	waveColChk.position(width / 20, height / 2.8);
+	waveColChk.style('color', '#ffffff');
+
+	videoChk = createCheckbox('video', false);
+	videoChk.position(width / 20, height / 2.53);
+	videoChk.style('color', '#ffffff');
+
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// function keyPressed() {
+// 	if(key == 'S') {
+// 		let c = get(width/3.6, height/20, 645, 645);
+// 		save(c);
+// 	 }
+// }
+
+
+function videoCap() {
+
+	let sel = filterSel.value();
+
+	if(videoChk.checked()) {
+		image(gfx, width / 3.65, height / 25);
+	}
+
+	if(myCapture !== null && myCapture !== undefined) { // safety first
+
+		gfx.image(myCapture, 0, 0, gfx.width, gfx.height);
+
+		gfx.filter(sel, 2);
+	}
+
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function showPoints() {
+
+	if(txtPtsChk.checked()) {
+
+		for(let tp of typepoints) {
+			tp.display();
+		}
+	}
+	if(!txtPtsChk.checked()) {
+		//sliderBkdOp.value(0);
+		push();
+		blendMode(OVERLAY);
+		fill(255);
+		ellipse(mouseX, mouseY, 150 + ampEase / 2);
+		pop();
+	}
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+function draw() {
+	/* audio vars: amp, ampEase, fft, waveform */
+	bkdOp = sliderBkdOp.value();
+	background(0, bkdOp);
+	noFill();
+
+	updateAudio();
+	videoCap();
+	showPoints();
+	layerZ();
+
+	for(let hk of haikuz) {
+		hk.display();
+	}
+}
+
+
+
+
+function layerZ() {
+
+	push();
+	layer.stroke(255);
+	layer.strokeWeight(0.5);
+	layer.noFill();
+	layer.rect(width / 3.65, height / 25, 650, 650);
+	pop();
+
+	//print(fft)
+	image(layer, 0, 0);
+
+
+	if(amp <= 0) {
+		//sliderBkdOp.value(70);
+		image(layer2, width / 3.65, height / 25);
+	}
+
+	push();
+	//layer2.background(0);
+	layer2.fill(255);
+	layer2.imageMode(CENTER);
+	layer2.image(img, mouseX - 400, mouseY);
+	layer2.textAlign(CENTER);
+	layer2.textSize(70);
+	layer2.text('IS YOUR MIC ON?', width / 4.3, height / 2);
+	pop();
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+class TypePoints {
+
+	//new TypePoints(text x, text y, text, input y, syllable count, syl indicador y);
+
+	constructor(x, y, txt, y2, syl, y3) {
+
+		this.points;
+		this.bounds;
+		this.inp;
+		//this.col = col;
+		this.syl = syl;
+		this.x = x;
+		this.y = y;
+		this.y2 = y2;
+		this.y3 = y3;
+		//this.tbh = tbh;
+		//this.size = mySize;
+		this.txt = txt;
+		// this.inputL = createInput(this.txt);
+		// this.inputL.position(width / 1.23, this.y2);
+		// this.inputL.size(200, 15);
+		// //print(this.inputL)
+		// this.inputL.input(this.genType);
+		this.genType();
+
+	}
+
+	genType() {
+
+		//let  inp = this.inputL.value();
+		//textToPoints(txt, x, y, size, options)
+		this.points = font.textToPoints(this.txt, this.x, this.y, 50, {
+			sampleFactor: .35,
+			simplifyThreshold: 0
+		});
+		//print(points.length);
+
+		this.bounds = font.textBounds(this.txt, this.x, this.y, 50);
+	}
+
+	display() {
+
+		noFill();
+		stroke(sliderCol.value());
+		let filt = filterType.value();
+
+		this.inp = this.txt;
+		if(syllable(this.inp) != this.syl) {
+
+			fill(random(255), random(255), random(255));
+			rect(width / 2, this.y3, 650, 50);
+		}
+
+
+		beginShape();
+
+		for(let i = 0; i < this.points.length; i++) {
+			let p = this.points[i];
+			if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+
+				p.x = p.x + cos(ampEase * .1 + i * amp);
+				p.y = p.y + sin(ampEase * .1 + i * amp);
+
+			}
+			point(p.x, p.y);
+		}
+		endShape();
+
+
+		if(filt == "points") {
+			beginShape();
+
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+
+					sliderBkdOp.value(50);
+					p.x = p.x + cos(ampEase * .1 + i * amp) * 3;
+					p.y = p.y + sin(ampEase * .1 + i * amp) * 3;
+
+				}
+				point(p.x, p.y);
+			}
+			endShape();
+		}
+
+		if(filt == "vertex") {
+			beginShape();
+
+
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+
+					sliderBkdOp.value(50);
+					p.x = p.x + sin(ampEase / 5);
+					p.y = p.y / sin(ampEase / 10);
+
+				}
+				vertex(p.x, p.y);
+			}
+			endShape();
+		}
+
+		if(filt == "fill") {
+			push();
+			beginShape();
+			fill(sliderCol.value());
+
+
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+
+					sliderBkdOp.value(50);
+					p.x = p.x - sin(ampEase);
+					p.y = p.y + ampEase / 5;
+
+				}
+				vertex(p.x, p.y);
+			}
+			endShape();
+			pop();
+		}
+		if(filt == "morph") {
+
+			beginShape();
+
+
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+
+					push();
+					sliderBkdOp.value(0);
+					p.x = p.x + sin(ampEase);
+					p.y = p.y + cos(ampEase);
+					ellipse(p.x, p.y, 5 + ampEase / 5);
+					pop();
+
+				}
+			}
+			endShape();
+		}
+		if(filt == "probe") {
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+					push();
+					sliderBkdOp.value(100);
+					//translate(p.x2, p.y*2);
+					//translate(p.x2, p.y);
+					translate(mouseX, mouseY);
+					rotate(radians(sin(amp * i * amp) * 180));
+					let w = (p.x + amp, p.y + amp) / 5;
+					line(p.x, p.y, w, w);
+					pop();
+				}
+			}
+		}
+
+
+	}
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+class HaikuForms {
+
+	constructor(y, s) {
+		this.y = y;
+		this.size = s;
+
+	}
+
+	display() {
+		stroke(255);
+		strokeWeight(.2);
+		if(waveFrmChk.checked()) {
+
+			for(let hk of haikuz) {
+				hk.haikuForms1();
+			}
+		}
+		if(waveColChk.checked()) {
+			fill(random(255), random(255), random(255));
+		}
+	}
+
+	haikuForms1() {
+
+		beginShape();
+		for(let i = 0; i < waveform.length; i++) {
+			let line1Freq = waveform[i] * this.size;
+			let x = map(i, 0, waveform.length, 0, width);
+			curveVertex(x, this.y + line1Freq);
+			//let count = 100;
+			// for(let i = 0; i < count; i++) {
+			// 	let x = map(i, width/2, count, 0, width/2);
+			// 	let waveSel = waveform[floor(map(i, 0, count, 0, waveform.length))];
+			// 	let fftSel = -fft[floor(map(i, 0, count, 0, fft.length))];
+			// 	ellipse(x, this.y + line1Freq);
+			// }
+			// pop();
+		}
+		endShape();
+
+	}
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+/* AUDIO INIT */
+let mic, fftRaw, fft, waveform, amp = 0.0,
+	ampStereo = {
+		l: 0.0,
+		r: 0.0
+	},
+	ampEase = 0.0,
+	numBins = 512,
+	bands = 12;
+
+function setupAudio() {
+	userStartAudio();
+	mic = new p5.AudioIn();
+	mic.start();
+	fftRaw = new p5.FFT(0.75, numBins);
+	fftRaw.setInput(mic);
+}
+
+function updateAudio() {
+	fftRaw.analyze();
+	amp = mic.getLevel() * 1000; // average mixed amplitude
+	ampStereo.l = mic.amplitude.getLevel(0) * 500; // average left amplitude
+	ampStereo.r = mic.amplitude.getLevel(1) * 500; // average right amplitude
+	ampEase = ease(amp, ampEase, 0.075); // smooth 'amp'
+	waveform = fftRaw.waveform(); // array (-1, 1)
+	fft = fftRaw.logAverages(fftRaw.getOctaveBands(bands)); // array (0, 255)
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

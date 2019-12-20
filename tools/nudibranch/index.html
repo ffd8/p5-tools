@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>nudibranch_final_20191219120516_001</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//nudibranch_final_20191219120516_001
+
+
+var credits = { 
+    "names" : [ 
+        "Yujia.Ma" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"Nadine.Bitterli" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "The nudibranch, which can be individually adjusted by the eight sliders, is a wonderful tool to generate new visual images. Among other things, the sliders can be used to customize the length, speed, transparency, color of the background, color of the points, size of the points, frequency of movement, and effective size of the nudibranch. If you like the visual image, you can also make a screenshot. However, if you want to return to the original settings, you can press the reset button. Have fun in exploring the nudibranch tool! Yujia and Nadine" 
+} 
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+
+
+var circle = 200;
+var rot;
+var col;
+var freq = 0.00005;
+var cont = 0;
+var r;
+
+let sliderDotcolor
+let sliderDotsize
+let sliderFreq
+let sliderH
+let sliderNum
+let sliderSpeed
+let sliderTransparency
+let sliderBG
+
+let button;
+let button1;
+let textcontent=['Welcome!','Create Your Sketches','Add your name'];
+
+let input, button2, greeting;
+let title;
+let labelColor = "#83ccc2"; // pink-#ff02f0
+
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+
+//group1----------------------------------------
+	sliderDotcolor = createSlider(0, 255, 150); //min,max,default position,
+	sliderDotcolor.position(width / 2 + 200+250, 60)
+	
+			//Dots'Color
+	label = createDiv ("Dots'Color");
+	label.position(width / 2 + 200+250+1+1, 50-5);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+///
+	sliderDotsize = createSlider(0, 30, 20)
+	sliderDotsize.position(width / 2 + 200+250, 60+40+10)
+	
+				//Dots'Size
+	label = createDiv ("Dots'Size");
+	label.position(width / 2 + 200+250+1+1, 50+40-5+10);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+////
+	sliderFreq = createSlider(0, 0.000150, 0.000050, 0.000005)
+	sliderFreq.position(width / 2 + 200+250, 100+40+20)
+	
+				//Frequency
+	label = createDiv ("Frequency");
+	label.position(width / 2 + 200+250+1+1, 50+40+40+12);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+////
+	sliderH = createSlider(1, 20, 5)
+	sliderH.position(width / 2 + 200+250, 140+40+10+18)
+	
+				//Height
+	label = createDiv ("Height");
+	label.position(width / 2 + 200+250+1+1, 50+40+40+40-5+25);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+	
+//group2----///////////////////////////////////
+
+				//Length=Number
+	label = createDiv ("Length");
+	label.position(width / 2 + 200+250, 180+40+40-20);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+	
+	sliderNum = createSlider(0, 1500, 400)
+	sliderNum.position(width / 2 + 200+250, 180+40+40-4)
+////
+			//Speed
+	label = createDiv ("Speed");
+	label.position(width / 2 + 200+250, 180+40+40+40-12);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+	
+	sliderSpeed = createSlider(1, 10, 2)
+	sliderSpeed.position(width / 2 + 200+250, 180+40+40+40+4)
+//
+				//Transparency
+	label = createDiv ("Transparency");
+	label.position(width / 2 + 200+250, 180+40+40+40+40+10-16);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+
+	sliderTransparency = createSlider(0, 100, 30)
+	sliderTransparency.position(width / 2 + 200+250, 180+40+40+40+40+10)
+//
+				//Background
+	label = createDiv ("Background");
+	label.position(width / 2 + 200+250, 180+40+40+40+40+40+15-17);
+	label.style('color', labelColor)
+	label.style('font-family','sans-serif')
+	label.style('font-size', '10pt')
+	
+	sliderBG=createSlider(0,255,24)
+	sliderBG.position(width / 2 + 200+250,180+40+40+40+40+40+15)
+
+///////////////////////////////////////////////////
+
+	button = createButton('save png');
+	button.position(width / 2 + 200+250,180+40+40+40+40+40+15+54);
+	button.mousePressed(savesketch);
+	button.style('color', '#58807a')
+	button.size(70, 25)
+	
+	button1=createButton('clear')
+	button1.position(width / 2 + 200+250+0,180+40+40+40+40+40+15+54+40)
+	button1.mousePressed(clearcanvas)
+	button1.style('color', '#58807a')
+	button1.size(70, 25)
+
+	
+//-------------------------------------
+	title=createElement('h2','Create Your Nudibranch')
+	title.position(width / 2 + 200+250,height-90)
+	title.style('color',labelColor)
+	title.style('font-family','sans-serif')
+	title.style('font-size', '10pt')
+
+  //textAlign(CENTER);
+
+}
+
+function greet() {
+  const name = input.value();
+	textcontent[2]=name;
+
+}
+
+	function savesketch() {
+		saveCanvas('myCanvas', 'png');
+	}
+	
+	function clearcanvas(){
+		clear()
+	}
+
+function draw() {
+	background(sliderBG.value(), sliderTransparency.value());
+//	print(windowWidth)
+	//translate(300, 300);
+	//rotate(radians(rot));
+	ellipseMode(RADIUS);
+	let x = windowWidth - (sliderSpeed.value() * frameCount) % (windowWidth * 1.5);
+	
+	for(var i = 0; i < sliderNum.value(); i++) {
+		circle = 200 + 50 * cos(millis() * sliderFreq.value() * i);
+		col = map(circle, 150, 250, 255, 60);
+		r = map(circle, 150, 250, sliderDotsize.value(), 5);
+		fill(col, 0, sliderDotcolor.value());
+		noStroke();
+		//  ellipse(circle*cos(i), circle*sin(i),r,r);    
+		//   ellipse((frameCount+i)%windowWidth, circle*cos(i)/sliderH.value()+300,r,r);  
+		ellipse(x + i, height / 2 + circle * cos(i) * sliderH.value() / 10, r, r);
+		// rot=rot+0.00005; 	
+
+	}
+	push()
+	
+	let s=random(10,20);
+	textSize(50);
+	fill(200,0,col);
+//	text(textcontent[(frameCount/50)%3],width/2,height/2+200);
+//	text('Create',20,60)
+//	text('Your',20,110)
+//	text('Nudibranch',20,160)
+	pop()
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

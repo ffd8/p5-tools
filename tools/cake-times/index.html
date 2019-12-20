@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>P5LIVE – sketch</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//Strange Cake Times
+
+var credits = { 
+    "names" : [ 
+        "Hansol.Choi" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"Kerem.Yaman" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "Build yourself a strange cake!!!" 
+} 
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+
+let layer2D, material, label, candleCount, sliderCandle, sliderFire;
+let flameTransparency;
+let flameHeight;
+let layers = [];
+let layerOrder = [];
+//let material;
+let cSliders = [];
+let numberoflayers = 5;
+let diaMin = 200;
+let sliderwidth = 255;
+let candlefire = [];
+
+
+function setup() {
+	createCanvas(windowWidth, windowHeight, WEBGL);
+	background(0);
+	frameRate(25);
+	//colorMode(HSB);
+
+	let offy = 60;
+	label = createDiv("Color Your Cake");
+	label.position(width*.05, offy);
+	label.style('color', '#fff');
+	label.style('font-family', 'sans-serif'); 
+	
+	sliderCandle = createSlider(8, 20, 10);
+	sliderCandle.position(width / 2 - sliderwidth, offy);
+	sliderCandle.input(updateCandles);
+	label = createDiv("How Old Are You?");
+	label.position(width / 2 - 390, offy);
+	
+	label.style('color', '#fff');
+	label.style('color', '#fff');
+	label.style('font-family', 'sans-serif');
+	
+	// Candle Fire
+	sliderFire = createSlider(0, 40, 0);
+	sliderFire.position(width / 2 - sliderwidth, offy+30);
+	sliderFire.input(updateFlame);
+	label = createDiv("Lit'em Up!'");
+	label.position(width / 2 - 335, offy+30);
+	
+	label.style('color', '#fff');
+	label.style('color', '#fff');
+	label.style('font-family', 'sans-serif');
+
+	layer2D = createGraphics(300, 300);
+	layer2D.background(255);
+	layer2D.rectMode(RADIUS)
+	layer2D.angleMode(DEGREES)
+
+	layer2D.rotate(45);
+	angleMode(DEGREES);
+	
+	for(let i = 0; i < numberoflayers; i++) {
+		let dia = map(i, 0, numberoflayers - 1, width * .2, width * .05)
+		let hei = height / 4 / numberoflayers;
+		layers.push(new Layer(i, dia, hei));
+		
+		cSliders.push(new Slider(width *.015, offy+30 + (i * 30)))
+		label = createDiv(1 + i), ("layer"); //create div
+		label.position(width *.015, offy+30 + (i * 30)); // position div
+		label.style('color', '#fff'); // style div
+		label.style('font-family', 'sans-serif'); // style div
+	}
+
+}
+
+
+function draw() {
+	background(0);
+
+	orbitControl(10);
+	lights();
+	noStroke();
+	rotateX(-25)
+	
+	layer2D.fill(255, 0, 0);
+	layer2D.noStroke();
+	for(let i = 0; i < 20; i++) {
+		layer2D.rect(0 + 40 * i, 0 + 20 * i, 8, 400);
+	}
+	
+	for(let i = 0; i < numberoflayers; i++) {
+		let l = layers[i];
+		translate(0, -l.hei);
+		l.color = cSliders[i].value();
+		l.show();
+		//l.candleFires = [];
+		//l.genCandleFire(frameCount);
+	}
+	//print(sliderCandle.value());
+	
+	// if activated the Fire is animated. but this makes sketch pretty slow beause of rerendering in frameCount
+	//updateFlame();
+}
+
+
+function updateFlame() {
+	for(let i = 0; i < numberoflayers; i++) {
+		let l = layers[i];
+		//l.candles = [];	//empty the array before generating new candles
+		l.candleFires = []; //empty the array... "
+		//l.genCandles();
+		l.genCandleFire();
+	}
+}
+
+function updateCandles() {
+	for(let i = 0; i < numberoflayers; i++) {
+		let l = layers[i];
+		l.candles = [];	//empty the array before generating new candles
+		l.candleFires = []; //empty the array... "
+		l.genCandles();
+		l.genCandleFire();
+	}
+}
+
+
+class Slider {
+	constructor(x, y) {
+	this.slider = createSlider(0, 255, 0);
+	this.slider.position(x + 25, y);
+	this.slider.style('width', '200px');
+	}
+
+	value() {
+		return this.slider.value();
+	}
+}
+
+class Layer {
+	constructor(id, dia, hei, color) {
+		this.id = id;
+		this.dia = dia;
+		this.hei = hei;
+		this.color = color;
+		this.active = false;
+		this.candles = [];
+		this.candleFires = [];
+		this.genCandles();
+		this.genCandleFire();
+	}
+
+	genCandles() {
+		this.count = this.dia / sliderCandle.value();
+		for(let i = 0; i < this.count; i++) {
+			this.candles.push(new Candle(this.dia - 20, this.hei-10, this.count));
+		}
+	}
+	
+	genCandleFire() {
+		this.count = this.dia / sliderCandle.value();
+		for(let i = 0; i < this.count; i++) {
+			this.candleFires.push(new CandleFire(this.dia - 20, this.hei+25, this.count, this.id));
+		}
+	}
+
+	show() {
+		rotateY(frameCount*.2)
+
+		fill(this.color, 255 - this.color, this.color);
+		cylinder(this.dia, this.hei);
+		
+		for(let c of this.candles) {
+			c.show();
+		}
+	
+		for(let f of this.candleFires) {
+			f.show();
+		}
+	}
+}
+
+class Candle {
+	constructor(_translate, _vPos, _count) {
+		//2, 50, layer2D, 190, 200
+		
+		this.count = _count;
+		
+		this.translate = _translate;
+		this.vPos = _vPos;
+		this.genTexture(); // creates - this.layer2D
+
+		//this.candleFire;
+	//	this.lightCandle();
+	}
+	
+	
+//	lightCandle() {
+//		this.candleFire = new CandleFire(this.translate,this.vPos);
+//	}
+	
+	genTexture() {
+		this.layer2D = createGraphics(300, 300);
+		this.colorPal = createVector(random(255), random(255), random(255));
+		this.layer2D.background(this.colorPal.x, this.colorPal.y, this.colorPal.z);
+		this.layer2D.rectMode(CENTER);
+		this.layer2D.angleMode(DEGREES);
+		this.layer2D.rotate(45);
+		this.layer2D.fill(255 - this.colorPal.x, 255 - this.colorPal.y, 255 - this.colorPal.z);
+		this.layer2D.noStroke();
+	
+		for(let i = 0; i < 20; i++) {
+			this.layer2D.rect(0 + 40 * i, 0 + 20 * i, 8, 400);
+		}
+	}
+
+	show() {
+		//texture(layer2D);
+		fill(255);
+		// rotateY(360/this.count)
+		rotateY(360.0 / this.count);
+		texture(this.layer2D); // add the texture we generated
+		push();
+		translate(this.translate, -this.vPos, 0);
+		// translate(diaMin, -this.vPos, 0);
+		cylinder(2, 50);
+		pop();
+	}
+}
+	
+	
+class CandleFire {
+	constructor(_translate, _vPos, _count, _layerID) {
+		//2, 50, layer2D, 190, 200
+		this.layerID = _layerID;
+		this.count = _count; 
+		this.translate = _translate;
+		this.vPos = _vPos;
+
+		this.genTexture();
+	}
+	
+	genTexture() {
+		this.layer2D = createGraphics(300,300);
+		this.layer2D.pixelDensity(.05);
+		this.layer2D.background (255, 0)
+		this.layer2D.ellipseMode(CENTER);
+		this.layer2D.rectMode(CENTER);
+		this.layer2D.angleMode(DEGREES);
+		this.layer2D.fill(255, 0, 0);
+		this.layer2D.ellipse(this.layer2D.width / 2, this.layer2D.height / 2, this.layer2D.width * .4, this.layer2D.height * .8 + random(this.layer2D.height/5));//(this.flameHeight * .4));
+		this.layer2D.fill(255, 255, 0);
+		this.layer2D.ellipse(this.layer2D.width / 2, this.layer2D.height / 2 + this.layer2D.height / 10, this.layer2D.width * .15, this.layer2D.height * .5 + random(this.layer2D.height/4));
+	}
+	
+	show() {
+		texture(layer2D);
+		fill(255);
+		
+		texture(this.layer2D);
+		//rotateY(360.0 / this.count);
+		//rotateY(360.0 / this.count);
+		rotateY(360.0 / this.count);
+		noStroke();
+		push();
+		//translate (this.xPos, this.yPos);
+	//	translate(this.translate, -this.vPos, (365/this.count) -this.count%5-3);
+
+		//corrections for the flame position.. 
+				// no idea why it is not working like the cansles.. maybe starting point is diffrent.
+		let correction = 0;
+		if(this.layerID == 0) {
+			correction = -35;
+		} else if(this.layerID == 1) {
+			correction = -18;
+		} else if(this.layerID == 2) {
+			correction = 0;
+		} else if (this.layerID == 3){
+			correction = 15;
+		} else {
+			correction = 30;
+		}
+
+		//correction = -1 * (360.0 / this.count);
+		
+		translate(this.translate, -this.vPos-(sliderFire.value()/2)+10, correction);
+		plane(sliderFire.value(), sliderFire.value());
+		//cylinder(2, 50);
+		pop();
+	}
+}
+
+
+
+
+
+
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

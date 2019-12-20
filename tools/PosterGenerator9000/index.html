@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animated 3D&Audio Poster Tool</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+    
+    <style type="text/css">
+		@font-face {
+    font-family: GT_CineType_Reg;
+    src: url(data/fonts/GT-Cinetype-Regular.otf);
+}
+	@font-face {
+		font-family: GT_CineType_Bold;
+		src: url(data/fonts/GT-Cinetype-Bold.otf);
+	}
+	@font-face {
+		font-family: GT_CineType_Mono;
+		src: url(data/fonts/GT-Cinetype-Mono.otf);
+	}
+
+		body{
+		font-family:GT_CineType_Mono;
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+/* sliders */
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  background: #000;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 5px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 5px;
+  background: #fff;
+  cursor: pointer;}
+/* end sliders */
+
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+		</script>
+<script type="text/javascript">
+var credits = { 
+    "names" : [ 
+        "alain.brusch" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"andrea.cavazzoni" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "Our project consists of an F4 format poster generator for both static and moving outcomes. The tool combines five different modes, ranging from 3D to audio reactive and abstract moving shapes. Each mode has its own sliders and typing options, which allow the user to highly customize the final outcome. It is possible to change the size of the canvas for high-resolution exports. Each layer is made up for separate export including transparent background, thus users are allowed to further adjust any of these in other digital applications or to prepare the layers for silkscreen printing. Last but not least, the full poster can be exported as high-resolution image. Have fun exploiting the tool." 
+} 
+// POSTER & ANIMATION CREATION TOOL CC: ANDREA CAVAZZONI & ALAIN BRUSCH
+// SPACE FOR SOME FURTHER NICE AND INCREDIBLE IMPORTANT NOTES OR INFO
+
+let posterF4=0.699;
+let sel;
+let h1 = [];
+let h2 = [];
+let f1, f2, f3, f4;
+let mode = 1,
+	useBackground = true,
+	useHeader = true,
+	useFooter = true;
+////////////////////////////
+////////////////////////////
+//let objNames = ['Hand', 'Head', 'Artefakt'];
+//let objLoc = ['data/obj/handOBJ.obj', 'data/obj/head.obj','data/obj/Column.obj']
+let objNames = ['Hand', 'Head', 'Banana','Artefact','CandyCane','CCTVCamera'];
+let objLoc = ['data/obj/handOBJ.obj', 'data/obj/head.obj','data/obj/banana.obj','data/obj/Column.obj','data/obj/candyCane.obj','data/obj/camera.obj']
+let objFiles = [];
+
+////////////////////////////
+////////////////////////////
+//typeWave
+let rows, columns;
+let xSpace, ySpace;
+let yWave;
+let yWaveSize = 20;
+let yWaveSpeed = 0.1;
+let time = 2;
+////////////////////////////
+////////////////////////////
+//layers
+let og;
+let infoLayer;
+let typeLayer;
+let graphicLayer;
+let layer3D;
+let myModel;
+////////////////////////////
+////////////////////////////
+//audio
+let pts;
+let font;
+let bounds;
+let txtA, txtSize, txtOptions;
+let soundLayer;
+////////////////////////////
+////////////////////////////
+function preload() {
+	for(let o of objLoc) {
+		objFiles.push(loadModel(o));
+	}
+	font = loadFont('data/fonts/AkzidenzGrotesk-LightExtended.otf');
+}
+////////////////////////////
+////////////////////////////
+function setup() {
+	createCanvas(windowWidth, windowHeight);
+///
+sel = createSelect();
+  sel.position(20, 80);
+  sel.option('Home');
+  sel.option('3D Mode');
+  sel.option('AudioReactive');
+  sel.option('AudioReactiveNoBG');
+  sel.option('Bouncy');
+  sel.option('AudioSpiral');
+  sel.style('color','#fff');
+  sel.style('font-family','GT_CineType_Reg');
+  sel.style('font-size','12px');
+  sel.style('width','130px');
+  sel.style('height','25px');
+  sel.style('border-color','#000');
+  sel.style('border-width','1px');
+  sel.style('border-radius','5px');
+  sel.style('background-color','#000');
+  //sel.option('drawmode6');
+  sel.changed(changeModes);
+///
+objMenu = createSelect();
+	objMenu.position(windowWidth-250, 165);
+	objMenu.style('color','#fff');
+	objMenu.style('font-size','12px');
+	objMenu.style('font-family','GT_CineType_Reg');
+  	objMenu.style('width','125px');
+  	objMenu.style('height','20px');
+	objMenu.style('border-color','#000');
+  	objMenu.style('border-width','1px');
+  	objMenu.style('border-radius','5px');
+  	objMenu.style('background-color','#000');
+	for(let i=0;i<objNames.length;i++){
+		objMenu.option(objNames[i],i); 
+		}
+	objMenu.changed(changeObject);
+///
+	inp = createInput('MAIN TEXT').position(20, 120).style('width', '125px');
+	inp.style('color','#fff');
+	inp.style('font-size','10px');
+	inp.style('font-family','GT_CineType_Reg');
+	inp.style('height','20px');
+	inp.style('border-color','#000');
+	inp.style('border-width','1px');
+	inp.style('border-radius','5px');
+	inp.style('background-color','#000');
+	inp.style('text-align','center');
+	inp.input(updateInput);
+//////////////
+    oh = createInput('2384').position(190, windowHeight-135).style('width', '105px');
+	oh.style('color','#fff');
+	oh.style('font-size','10px');
+	oh.style('font-family','GT_CineType_Reg');
+	oh.style('height','20px');
+	oh.style('border-color','#000');
+	oh.style('border-width','1px');
+	oh.style('border-radius','5px');
+	oh.style('background-color','#000');
+	oh.style('text-align','center');
+	///
+	th1 = createInput('MA').position(20, 220).style('width', '100px');
+	th1.style('color','#fff');
+	th1.style('font-size','10px');
+	th1.style('font-family','GT_CineType_Reg');
+	th1.style('height','20px');
+	th1.style('border-color','#000');
+	th1.style('border-width','1px');
+	th1.style('border-radius','5px');
+	th1.style('background-color','#000');
+	th1.style('text-align','center');
+	///
+	th2 = createInput('DIGITAL').position(20, 250).style('width', '100px');
+	th2.style('color','#fff');
+	th2.style('font-size','10px');
+	th2.style('font-family','GT_CineType_Reg');
+	th2.style('height','20px');
+	th2.style('border-color','#000');
+	th2.style('border-width','1px');
+	th2.style('border-radius','5px');
+	th2.style('background-color','#000');
+	th2.style('text-align','center');
+	///
+	th3 = createInput('TOOLS').position(20, 280).style('width', '100px');
+	th3.style('color','#fff');
+	th3.style('font-size','10px');
+	th3.style('font-family','GT_CineType_Reg');
+	th3.style('height','20px');
+	th3.style('border-color','#000');
+	th3.style('border-width','1px');
+	th3.style('border-radius','5px');
+	th3.style('background-color','#000');
+	th3.style('text-align','center');
+	///
+	th4 = createInput('HGK').position(20, 310).style('width', '100px');
+	th4.style('color','#fff');
+	th4.style('font-size','10px');
+	th4.style('font-family','GT_CineType_Reg');
+	th4.style('height','20px');
+	th4.style('border-color','#000');
+	th4.style('border-width','1px');
+	th4.style('border-radius','5px');
+	th4.style('background-color','#000');
+	th4.style('text-align','center');
+	///
+	tf1 = createInput('19DEC').position(20, 370).style('width', '100px');
+	tf1.style('color','#fff');
+	tf1.style('font-size','10px');
+	tf1.style('font-family','GT_CineType_Reg');
+	tf1.style('height','20px');
+	tf1.style('border-color','#000');
+	tf1.style('border-widtf','1px');
+	tf1.style('border-radius','5px');
+	tf1.style('background-color','#000');
+	tf1.style('text-align','center');
+	///
+	tf2 = createInput('ANDREA CAVAZZONI').position(20, 400).style('width', '100px');
+	tf2.style('color','#fff');
+	tf2.style('font-size','10px');
+	tf2.style('font-family','GT_CineType_Reg');
+	tf2.style('height','20px');
+	tf2.style('border-color','#000');
+	tf2.style('border-widtf','1px');
+	tf2.style('border-radius','5px');
+	tf2.style('background-color','#000');
+	tf2.style('text-align','center');
+	///
+	tf3 = createInput('ALAIN BRUSCH').position(20, 430).style('width', '100px');
+	tf3.style('color','#fff');
+	tf3.style('font-size','10px');
+	tf3.style('font-family','GT_CineType_Reg');
+	tf3.style('height','20px');
+	tf3.style('border-color','#000');
+	tf3.style('border-widtf','1px');
+	tf3.style('border-radius','5px');
+	tf3.style('background-color','#000');
+	tf3.style('text-align','center');
+	///
+	tf4 = createInput('2019').position(20, 460).style('width', '100px');
+	tf4.style('color','#fff');
+	tf4.style('font-size','10px');
+	tf4.style('font-family','GT_CineType_Reg');
+	tf4.style('height','20px');
+	tf4.style('border-color','#000');
+	tf4.style('border-widtf','1px');
+	tf4.style('border-radius','5px');
+	tf4.style('background-color','#000');
+	tf4.style('text-align','center');
+	///
+	scl = createInput('0.23').position(190, windowHeight-80).style('width', '105px');
+	scl.style('color','#fff');
+	scl.style('font-size','10px');
+	scl.style('font-family','GT_CineType_Reg');
+	scl.style('height','20px');
+	scl.style('border-color','#000');
+	scl.style('border-widtf','1px');
+	scl.style('border-radius','5px');
+	scl.style('background-color','#000');
+	scl.style('text-align','center');     
+///
+	th1.input(updateInput);
+	th2.input(updateInput);
+	th3.input(updateInput);
+	th4.input(updateInput);
+	tf1.input(updateInput);
+	tf2.input(updateInput);
+	tf3.input(updateInput);
+	tf4.input(updateInput);
+	scl.input(updateInput);
+	////////////////////////////
+//RESET BUTTON
+	buttonClear = createButton('RESET CANVAS');
+    buttonClear.position(190,80);
+    buttonClear.size(107,20);
+    buttonClear.style('color','#fff');
+    buttonClear.style('font-size','10px');
+    buttonClear.style('font-family','GT_CineType_Reg');
+    buttonClear.style('border-color','#000');
+    buttonClear.style('border-width','1px');
+    buttonClear.style('border-radius','5px');
+    buttonClear.style('background-color','#000');
+    buttonClear.mousePressed(clearLayers);
+/////
+	// buttonStop = createButton('Stop Movement');
+    // buttonStop.position(190,105);
+    // buttonStop.size(107,20);
+    // buttonStop.style('color','#fff');
+    // buttonStop.style('font-size','10px');
+    // buttonStop.style('font-family','GT_CineType_Reg');
+    // buttonStop.style('border-color','#000');
+    // buttonStop.style('border-width','1px');
+    // buttonStop.style('border-radius','5px');
+    // buttonStop.style('background-color','#000');
+    // buttonStop.mousePressed(stopMove);
+	////////////////////////////
+
+	// buttonAnimate = createButton('RESET CANVAS');
+    // buttonAnimate.position(190,130);
+    // buttonAnimate.size(107,20);
+    // buttonAnimate.style('color','#fff');
+    // buttonAnimate.style('font-size','10px');
+    // buttonAnimate.style('font-family','GT_CineType_Reg');
+    // buttonAnimate.style('border-color','#000');
+    // buttonAnimate.style('border-width','1px');
+    // buttonAnimate.style('border-radius','5px');
+    // buttonAnimate.style('background-color','#000');
+    // buttonAnimate.mousePressed(startAnimation);
+	////////////////////////////
+	//ROTATION ON / OFF
+	// checkbox = createCheckbox('label', false);
+	// checkbox.position(indowWidth-250,550);
+	// checkbox.style("color", '#fff');
+	// checkbox.style("font-size", '12px');
+	// checkbox.style("font-family", 'GT_CineType_Reg');
+  	// checkbox.changed(toggleRotation);
+	////////////////////////////
+	//CREATE OUTPUT BUTTONS
+
+	buttonPrint3d = createButton('3DLAYER');
+	buttonPrint3d.position(20,windowHeight-135);
+	buttonPrint3d.size(107,20);
+	buttonPrint3d.style('color','#fff');
+	buttonPrint3d.style('font-size','10px');
+	buttonPrint3d.style('font-family','GT_CineType_Reg');
+	buttonPrint3d.style('border-color','#000');
+	buttonPrint3d.style('border-width','1px');
+	buttonPrint3d.style('border-radius','5px');
+	buttonPrint3d.style('background-color','#000');
+	buttonPrint3d.mousePressed(saveOutput3D);
+
+	buttonPrintSound = createButton('SOUNDLAYER');
+	buttonPrintSound.position(20,windowHeight-110);
+	buttonPrintSound.size(107,20);
+	buttonPrintSound.style('color','#fff');
+	buttonPrintSound.style('font-size','10px');
+	buttonPrintSound.style('font-family','GT_CineType_Reg');
+	buttonPrintSound.style('border-color','#000');
+	buttonPrintSound.style('border-width','1px');
+	buttonPrintSound.style('border-radius','5px');
+	buttonPrintSound.style('background-color','#000');
+	buttonPrintSound.mousePressed(saveOutputSound);
+
+	buttonPrintInfo = createButton('GRAPHIC LAYER');
+	buttonPrintInfo.position(20,windowHeight-85);
+	buttonPrintInfo.size(107,20);
+	buttonPrintInfo.style('color','#fff');
+	buttonPrintInfo.style('font-size','10px');
+	buttonPrintInfo.style('font-family','GT_CineType_Reg');
+	buttonPrintInfo.style('border-color','#000');
+	buttonPrintInfo.style('border-width','1px');
+	buttonPrintInfo.style('border-radius','5px');
+	buttonPrintInfo.style('background-color','#000');
+	buttonPrintInfo.mousePressed(saveOutputInfo);
+
+	buttonPrintComplete = createButton('POSTER');
+	buttonPrintComplete.position(20,windowHeight-60);
+	buttonPrintComplete.size(107,25);
+	buttonPrintComplete.style('color','#fff');
+	buttonPrintComplete.style('font-size','10px');
+	buttonPrintComplete.style('font-family','GT_CineType_Reg');
+	buttonPrintComplete.style('border-color','#000');
+	buttonPrintComplete.style('border-width','1px');
+	buttonPrintComplete.style('border-radius','5px');
+	buttonPrintComplete.style('background-color','#000');
+	buttonPrintComplete.mousePressed(saveOutputPoster);
+
+	///////////////////////////
+	
+	createSliders();
+	labels();
+	createAlternateSliders();
+
+	////////////////////////////
+	//ADDING LAYERS	
+	createLayers();
+	////////////////////////////
+	//ADDING AUDIO TXT INPUTS
+	//audio add ons drawmode4
+	inp2 = createInput('AUDIO TEXT');
+	inp2.position(20, 150).style('width', '125px');
+	inp2.style('color','#fff');
+    inp2.style('font-size','10px');
+    inp2.style('font-family','GT_CineType_Reg');
+    inp2.style('height','20px');
+    inp2.style('border-color','#000');
+    inp2.style('border-width','1px');
+    inp2.style('border-radius','5px');
+    inp2.style('background-color','#000');
+    inp2.style('text-align','center')
+
+	inp2.input(updateInputA);
+	txtA = 'O';
+	txtSize = 350; //txtS.value() -> doesn't work | maybe try 2 * window.innerWidth + size?
+	txtOptions = { //amounts of points using
+		sampleFactor: .15,
+		simplifyThreshold: 0
+	}
+	genType()
+	//end of audio add ons dm4
+	////////////////////////////
+
+	updateInput();
+	imageMode(CENTER)
+	setupAudio();
+	og.angleMode(DEGREES);
+	
+}
+////////////////////////////
+////////////////////////////
+function createLayers(){
+	og = createGraphics(oh.value()*posterF4, oh.value());
+	infoLayer = createGraphics(oh.value()*posterF4, oh.value());
+	typeLayer = createGraphics(oh.value()*posterF4, oh.value());
+	graphicLayer = createGraphics(oh.value()*posterF4, oh.value());
+	layer3D = createGraphics(oh.value()*posterF4, oh.value(), WEBGL);
+	soundLayer = createGraphics(oh.value()*posterF4, oh.value());
+}
+
+function genType() {
+	pts = font.textToPoints(txtA, 0, 0, txtS.value(), txtOptions)
+	bounds = font.textBounds(txtA, 0, 0, txtS.value(), txtOptions);
+}
+
+function updateInputA() {
+	txtA = inp2.value();
+	genType()
+}
+
+function updateInput() {
+	//f1.txt = tf1.value()
+	txt = inp.value();
+}
+////////////////////////////
+////////////////////////////
+//MAIN DRAW FUNCTION
+function draw() {
+	/* audio vars: amp, ampEase, fft, waveform */
+	updateAudio();
+
+	if(useBackground) {
+		background(30, 30, 30);
+		////////////////////////////
+	////////////////////////////
+	push();
+	stroke(0);
+	strokeWeight(1);
+	line(160,180,160,windowHeight-50);
+	line(windowWidth-285,50,windowWidth-285,windowHeight-50);
+	pop();
+	////////////////////////////
+	////////////////////////////
+		og.background(0, fadeSlider.value()); //**maybe remove -> DISCUSS WITH ANDREA & TED
+	}
+	if(mode == 1) {
+		//background(0, 0, 255);
+		hideSlider3d();
+		hideSliderAudio();
+		hideSliderBouncy();
+		drawmode1(); //DRAWING LAYER
+	} else if(mode == 2) {
+		hideSliderAudio();
+		hideSliderBouncy();
+		showSlider3d();
+		drawmode2();
+		
+	} else if(mode == 3) {
+		// 	columnsSlider.hide(); 
+		hideSlider3d();
+		hideSliderBouncy();
+		showSliderAudio();
+		drawmode3();
+	} else if(mode == 4) {
+		hideSlider3d();
+		hideSliderBouncy();
+		showSliderAudio();
+		drawmode4();
+	} else if(mode == 5) {
+		hideSlider3d();
+		hideSliderAudio();
+		showSliderBouncy();
+		drawmode5();
+	} else if(mode == 6) {
+		hideSlider3d();
+		hideSliderAudio();
+		showSliderBouncy();
+		drawmode6();
+	}
+
+	infoLayers(); //ADDING INFO LINES ON TOP
+	//DRAW OUTPUT GRAPHIC LAYER (OG)
+	//og.image(infoLayer, width / 2, height / 2, (oh.value()*posterF4) * scl.value(), oh.value() * scl.value());
+	og.image(infoLayer,0,0);
+
+	image(og, width / 2, height / 2, (oh.value()*posterF4) * scl.value(), oh.value() * scl.value());
+
+
+}
+////////////////////////////
+////////////////////////////
+//INFO LINES HEADER & FOOTER
+function infoLayers() {
+    infoLayer.clear();
+	//new header info
+	h1 = new Header(th1.value(), 40, 30, 20);
+	h2 = new Header(th2.value(), (og.width / 1.5) / 2, 30, 20);
+	h3 = new Header(th3.value(), og.width / 2.5 + ((og.width / 2) / 2), 30, 20);
+	h4 = new Header(th4.value(), og.width - 40, 30, 20);
+	//new footer info	
+	f1 = new Footer(tf1.value(), 40, og.height - 20, 20);
+	f2 = new Footer(tf2.value(), (og.width / 1.5) / 2, og.height - 20, 20);
+	f3 = new Footer(tf3.value(), og.width / 2.5 + ((og.width / 2) / 2), og.height - 20, 20);
+	f4 = new Footer(tf4.value(), og.width - 40, og.height - 20, 20);
+	//draw header info
+	h1.display();
+	h2.display();
+	h3.display();
+	h4.display();
+
+	//draw footer info
+	f1.display();
+	f2.display();
+	f3.display();
+	f4.display();
+}
+////////////////////////////
+////////////////////////////
+//DRAWMODE1 * INSTRUCTIONS
+
+function drawmode1() {
+	//WE NEED TO DRAW EVERYTHING TO OG LAYER (OUTPUT GRAPHICS)
+	og.background(0);
+	og.fill(255)
+	og.push();
+	og.textFont(font)
+	og.textSize(210);
+	og.textAlign(LEFT);
+	og.text('CHOOSE\nYOUR\nMODES\nUSING\nTHE MENU\nLEFT TO\nTHE\nCANVAS', 50, 350); //INSTRUCTION TEXT
+	////og.text('THE MENUE NEXT TO THE CANVAS', 50, 300); //INSTRUCTION TEXT
+	og.pop();
+	og.push();
+	og.noFill()
+
+	og.stroke(255);
+	og.strokeWeight(5);
+	og.ellipse(og.width-400,frameCount%800,mouseY);
+	og.ellipse(og.width-550-frameCount%550,800-frameCount%800,mouseX);
+	og.ellipse(og.width-150+frameCount%150,og.height-100-frameCount%100,mouseY);
+	og.ellipse(150,og.height-100,mouseX);
+	og.ellipse(350+frameCount%og.width,og.height/2,mouseY);
+	og.pop();
+
+	//textSize(txtS.value());
+	//text(th1.value(), width / 2, height / 2, 500,100);
+}
+
+
+////////////////////////////
+//////////////////////////// 
+
+function drawmode2() { 
+	typeLayer.clear();
+	//background(0,60);
+	layer3D.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+    typeLayer.background(clrSlider.value(),clrSliderG.value(),  clrSliderB.value(), 10);
+	//orbitControl(5);
+	typeLayer.push();
+	typeLayer.textFont(font);
+	
+	typeLayer.textSize(10);
+	// Connect the slider values to the wave variables
+	rows = rowsSlider.value();
+	columns = columnsSlider.value();
+	xSpace = xSpaceSlider.value();
+	ySpace = ySpaceSlider.value();
+	yWaveSize = yWaveSizeSlider.value();
+	yWaveLength = yWaveLengthSlider.value();
+	yWaveOffset = yWaveOffsetSlider.value();
+	yWaveSpeed = yWaveSpeedSlider.value();
+	clr = clrSlider.value();
+	
+	//txt = inp.value();
+	
+	txt = inp.value();
+	// Center matrix
+	
+	typeLayer.translate(width / 2, height / 2);
+	// Reposition  matrix depending on width & height of the grid
+	typeLayer.translate(-(columns - 1) * xSpace / 2, -(rows - 1) * ySpace / 2);
+	typeLayer.noStroke();
+	typeLayer.fill(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value());
+
+	// grid
+	for(var i = 0; i < columns; i++) {
+		for(var j = 0; j < rows; j++) {
+			typeLayer.push();
+			// grid spacing 
+			typeLayer.translate(i * xSpace, j * ySpace);
+			// wave
+			//yWave = sin(frameCount * yWaveSpeed + i) * yWaveSize; //initial
+			yWave = sin(frameCount * yWaveSpeed + i) * yWaveSize;
+
+			yWavePre = cos(frameCount * yWaveSpeed + (i - 1) * yWaveLength + j * yWaveOffset) * yWaveSize;
+			yWavePost = cos(frameCount * yWaveSpeed + (i + 1) * yWaveLength + j * yWaveOffset) * yWaveSize;
+
+			let rot = atan2(yWavePost - yWavePre, 2 * xSpace);
+			typeLayer.translate(0, yWave);
+			typeLayer.textSize(txtS.value());
+			typeLayer.rotate(rot);
+			// let charSel = (i+j)%txt.length;
+			let charSel = (i + j) % txt.length;
+			let char = txt.charAt(charSel);
+			
+			typeLayer.text(char, 0, 0);
+			typeLayer.pop();
+		}
+	}
+	changeObject()
+	layer3D.textureMode(IMAGE);
+	
+	layer3D.texture(typeLayer);
+	layer3D.push();
+	//layer3D.translate(0,0,-250)
+	//image(typeLayer,-width/2,-height/2);
+	layer3D.pop();
+	layer3D.push();
+	layer3D.lights();
+	layer3D.noStroke();
+	layer3D.translate(traXslider.value(),traYslider.value(),0);
+	layer3D.rotateX(rotXslider.value());
+	layer3D.rotateY(rotYslider.value());
+	layer3D.rotateZ(rotZslider.value());
+	layer3D.rotateY(frameCount*0.03)
+	//rotateY(sin(-frameCount*0.05,frameCount*0.07))
+	layer3D.scale(objSlider.value());
+	//layer3D.rotateX(10);
+	layer3D.model(myModel);
+	layer3D.pop();
+	typeLayer.pop();
+	og.image(layer3D,0,0);
+}
+
+function drawmode3() {
+	/* audio vars: amp, ampEase, fft, waveform */
+	updateAudio();
+	//txtSize=txtS.value(); 				//***doesn't seem to work
+	soundLayer.imageMode(CENTER)
+	//soundLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+	og.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+	soundLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), 10);
+
+	soundLayer.push();
+	soundLayer.translate(og.width / 2, og.height / 2);
+	soundLayer.translate((-bounds.w / 2)+traXslider.value(), (bounds.h / 2)+(traYslider.value()-((height*4)/3)));
+	for(var i = 0; i < pts.length; i++) {
+		var pt = pts[i];
+		let aWave = waveform[floor(map(i, 0, pts.length, 0, waveform.length))] * 50
+		let aFFT = fft[floor(map(i, 0, pts.length, 0, fft.length))]
+		soundLayer.push();
+		soundLayer.translate(pt.x, pt.y);
+		var w = sin(i * .01 + frameCount * 0.01) * aFFT / 60;
+		let wave = int(sin(frameCount * .001 + (i * 1000) * aWave) * aFFT / 200);
+		soundLayer.rotate(sin(i * 0.01 + frameCount * 0.001) * aFFT / 60);
+		//rotateZ(sin(i * 0.01 + frameCount * 0.001) * 10);
+		//lights();
+		//normalMaterial();
+		//fill(255);
+		soundLayer.noFill();
+		//soundLayer.stroke(clrSliderB.value(), clrSlider.value(), clrSliderG.value());
+		soundLayer.stroke(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value(),fadeSlider.value());
+		soundLayer.strokeWeight(clrSliderStrokeW.value()+aWave);
+		//soundLayer.rect(2 * aWave, 2 + w * aFFT, 1);
+		//soundLayer.line(2*aWave,2+w*aFFT,10,10)
+		soundLayer.ellipse(2 * aWave, 2 + w * aFFT, 1)
+		soundLayer.pop();
+	}
+	soundLayer.pop();
+	og.image(soundLayer, 0, 0);
+}
+
+function drawmode4() {
+	/* audio vars: amp, ampEase, fft, waveform */
+	updateAudio();
+	
+	soundLayer.imageMode(CENTER)
+	////////////////////////////////	* OPEN PARAMETERS WE CAN CHANGE 
+	//soundLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+	//soundLayer.background(0,fadeSlider.value());
+	////////////////////////////////	
+	
+	soundLayer.push();
+	soundLayer.translate(og.width / 2, og.height / 2);
+	soundLayer.translate((-bounds.w / 2)+traXslider.value(), (bounds.h / 2)+(traYslider.value()-((height*4)/3)));
+	for(var i = 0; i < pts.length; i++) {
+		var pt = pts[i];
+		let aWave = waveform[floor(map(i, 0, pts.length, 0, waveform.length))] * 50
+		let aFFT = fft[floor(map(i, 0, pts.length, 0, fft.length))]
+		soundLayer.push();
+		soundLayer.translate(pt.x, pt.y);
+		var w = sin(i * .01 + frameCount * 0.01) * aFFT / 60;
+		let wave = int(sin(frameCount * .001 + (i * 1000) * aWave) * aFFT / 200);
+		soundLayer.rotate(sin(i * 0.01 + frameCount * 0.001) * aFFT / 60);
+		soundLayer.noFill();
+		////////////////////////////////	* TWO POSSIBILITIES WE CAN CHOSE FROM
+		//soundLayer.stroke(clrSliderB.value(), clrSlider.value(), clrSliderG.value());
+		soundLayer.stroke(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value(),fadeSlider.value());
+		////////////////////////////////	
+		////////////////////////////////	
+
+		soundLayer.strokeWeight(clrSliderStrokeW.value()+aWave);
+
+		////////////////////////////////	
+		////////////////////////////////	* DRAW BOX / LINE / ELLIPSE -> FREE TO CHOSE, ELLIPSE WORKS BEST
+
+		//soundLayer.box(2, 80 + w*aFFT, 10*w);
+		//soundLayer.line(2*aWave,2+w*aFFT,10,10)
+
+		soundLayer.ellipse(2 * aWave, 2 + w * aFFT, 1)
+		soundLayer.pop();
+	}
+	soundLayer.pop();
+	og.image(soundLayer, 0, 0);
+}
+
+function drawmode5(){
+	graphicLayer.clear();
+	graphicLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+	graphicLayer.fill(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value());
+	graphicLayer.stroke(clrSliderStrokeR.value(), clrSliderStrokeG.value(), clrSliderStrokeB.value());
+	graphicLayer.strokeWeight(clrSliderStrokeW.value());
+
+	for(let i = 1; i < clrSliderQuantity.value(); i++) {
+		graphicLayer.ellipse(graphicLayer.width - frameCount * clrSliderSpeed.value() * i % graphicLayer.width, graphicLayer.height - frameCount * clrSliderSpeed.value() * i % og.height, clrSliderWidth.value(), clrSliderHeight.value());
+		graphicLayer.ellipse(graphicLayer.width - frameCount * clrSliderSpeed.value() * i % graphicLayer.width, frameCount * clrSliderSpeed.value() * i % og.height, clrSliderWidth.value(), clrSliderHeight.value());
+		graphicLayer.ellipse(frameCount * clrSliderSpeed.value() * i % graphicLayer.width, frameCount * clrSliderSpeed.value() * i % graphicLayer.height, clrSliderWidth.value(), clrSliderHeight.value());
+		graphicLayer.ellipse(frameCount * clrSliderSpeed.value() * i % graphicLayer.width, graphicLayer.height - frameCount * clrSliderSpeed.value() * i % og.height, clrSliderWidth.value(), clrSliderHeight.value());
+	}
+	og.image(graphicLayer,0,0);
+}
+
+function drawmode6(){
+updateAudio();
+graphicLayer.push();
+graphicLayer.clear();
+graphicLayer.angleMode(DEGREES);
+graphicLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+graphicLayer.fill(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value());
+graphicLayer.stroke(clrSliderStrokeR.value(), clrSliderStrokeG.value(), clrSliderStrokeB.value());
+graphicLayer.strokeWeight(clrSliderStrokeW.value());
+graphicLayer.translate(graphicLayer.width / 2, graphicLayer.height / 2);
+graphicLayer.rotate(frameCount * clrSliderRotate.value());
+
+for(let i = 0; i < clrSliderQuantity.value(); i++) {
+	graphicLayer.push();
+	graphicLayer.translate(graphicLayer.width / i, graphicLayer.height / i);
+	graphicLayer.ellipse(0, 0, amp);
+	graphicLayer.pop();
+	graphicLayer.rotate(frameCount / clrSliderSpeed.value() - i / clrSliderQuantity.value() / clrSliderSpeed.value() + i);
+
+}
+graphicLayer.pop();
+og.image(graphicLayer,0,0);
+}
+
+////////////////////////////////	
+////////////////////////////////	
+//////////////////////////////////	 *** create DOM Elements 
+
+////////////////////////////////	
+//CREATE SLIDERS
+
+function createSliders() {
+	columnsSlider = createSlider(1, 100, 20).position(windowWidth-150, 204).style('width', '100px').addClass('slider');
+	//columnsSlider.style('color','#000');
+	columnsSlider.input(updateSlider);
+	rowsSlider = createSlider(1, 100, 25).position(windowWidth-150, 229).style('width', '100px').addClass('slider');
+	rowsSlider.input(updateSlider);
+	xSpaceSlider = createSlider(0, 400, 200).position(windowWidth-150, 254).style('width', '100px').addClass('slider');
+	xSpaceSlider.input(updateSlider);
+	ySpaceSlider = createSlider(0, 400, 200).position(windowWidth-150, 279).style('width', '100px').addClass('slider');
+	ySpaceSlider.input(updateSlider);
+	yWaveSizeSlider = createSlider(0, 100, 20).position(windowWidth-150, 304).style('width', '100px').addClass('slider');
+	yWaveSizeSlider.input(updateSlider);
+	yWaveLengthSlider = createSlider(0, PI, 0.5, 0.01).position(windowWidth-150, 329).style('width', '100px').addClass('slider');
+	yWaveLengthSlider.input(updateSlider);
+	yWaveOffsetSlider = createSlider(0, PI, 0.5, 0.01).position(windowWidth-150, 354).style('width', '100px').addClass('slider');
+	yWaveOffsetSlider.input(updateSlider);
+	yWaveSpeedSlider = createSlider(0, 0.25, 0.05, 0.01).position(windowWidth-150, 379).style('width', '100px').addClass('slider');
+	yWaveSpeedSlider.input(updateSlider);
+	
+	txtS = createSlider(10, 1600, 400, 1).position(260, 204).style('width', '100px').addClass('slider');
+	txtS.input(updateSlider);
+	fadeSlider = createSlider(0, 100, 90, 0).position(260, 229).style('width', '100px').addClass('slider');
+	fadeSlider.input(updateSlider);
+	
+	
+	objSlider = createSlider(0, 1500, 250, 1).position(windowWidth-150, 404).style('width', '100px').addClass('slider');
+	objSlider.input(updateSlider);
+	
+	traXslider = createSlider(-width*4, width*4, 0, 0).position(windowWidth-150, 429).style('width', '100px').addClass('slider');
+	traXslider.input(updateSlider);
+	traYslider = createSlider(-height*4, height*4,(height*4)/3, 0).position(windowWidth-150, 454).style('width', '100px').addClass('slider');
+	traYslider.input(updateSlider);
+	
+	//bottom sliders
+	clrSlider = createSlider(0, 255, 0, 0).position(260, 254).style('width', '100px').addClass('slider');
+	clrSlider.input(updateSlider);
+	clrSliderG = createSlider(0, 255, frameCount % 255, 0).position(260, 279).style('width', '100px').addClass('slider');
+	clrSliderG.input(updateSlider);
+	clrSliderB = createSlider(0, 255, 255, 0).position(260, 304).style('width', '100px').addClass('slider');
+	clrSliderB.input(updateSlider);
+
+	clrSliderFillR = createSlider(0, 255, 255, 0).position(260, 329).style('width', '100px').addClass('slider');
+	clrSliderFillR.input(updateSlider);
+	clrSliderFillG = createSlider(0, 255, 255, 0).position(260, 354).style('width', '100px').addClass('slider');
+	clrSliderFillG.input(updateSlider);
+	clrSliderFillB = createSlider(0, 255, 255, 0).position(260, 379).style('width', '100px').addClass('slider');
+	clrSliderFillB.input(updateSlider);
+
+	clrSliderStrokeW = createSlider(0, 255, 1, 0).position(260, 404).style('width', '100px').addClass('slider');
+	clrSliderStrokeW.input(updateSlider);
+
+	
+	rotXslider = createSlider(0, 360, 10, 0).position(windowWidth-150, 479).style('width', '100px').addClass('slider');
+	rotXslider.input(updateSlider);
+	rotYslider = createSlider(0, 360, 0, 0).position(windowWidth-150, 504).style('width', '100px').addClass('slider');
+	rotYslider.input(updateSlider);
+	rotZslider = createSlider(0, 360, 0, 0).position(windowWidth-150, 529).style('width', '100px').addClass('slider');
+	rotZslider.input(updateSlider);
+	
+}
+
+function createAlternateSliders(){
+	//stroke R,G,B + StrokeW
+	clrSliderStrokeR = createSlider(0, 255, 0, 0).position(windowWidth-150, 204).style('width', '100px').addClass('slider');
+	clrSliderStrokeR.input(updateSlider);
+	clrSliderStrokeG = createSlider(0, 255, 0, 0).position(windowWidth-150, 229).style('width', '100px').addClass('slider');
+	clrSliderStrokeG.input(updateSlider);
+	clrSliderStrokeB = createSlider(0, 255, 0, 0).position(windowWidth-150, 254).style('width', '100px').addClass('slider');
+	clrSliderStrokeB.input(updateSlider);
+	
+	//speed
+	clrSliderSpeed = createSlider(0, 10, 2, 0).position(windowWidth-150, 279).style('width', '100px').addClass('slider');
+	clrSliderSpeed.input(updateSlider);
+	//quantity
+	clrSliderQuantity = createSlider(0, 100, 10, 0).position(windowWidth-150, 304).style('width', '100px').addClass('slider');
+	clrSliderQuantity.input(updateSlider);
+	//rotate
+	clrSliderRotate = createSlider(0, 255, 0, 0).position(windowWidth-150, 329).style('width', '100px').addClass('slider');
+	clrSliderRotate.input(updateSlider);
+	//width
+	clrSliderWidth = createSlider(0, 500, 50, 0).position(windowWidth-150, 354).style('width', '100px').addClass('slider');
+	clrSliderWidth.input(updateSlider);
+	//height
+	clrSliderHeight = createSlider(0, 500, 50, 0).position(windowWidth-150, 379).style('width', '100px').addClass('slider');
+	clrSliderHeight.input(updateSlider);
+
+}
+
+function showSlider3d(){
+		objMenu.show();
+		labelOBJS.show();
+		columnsSlider.show(); 
+		rowsSlider.show();
+        xSpaceSlider.show();
+        ySpaceSlider.show();
+        yWaveSizeSlider.show();
+        yWaveLengthSlider.show();
+        yWaveOffsetSlider.show();
+        yWaveSpeedSlider.show();
+        txtS.show();
+        traXslider.show();
+        traYslider.show(); 
+		rotXslider.show();
+        rotYslider.show();   
+        rotZslider.show();
+		objSlider.show();
+
+		//labels
+		labelcolumns.show();
+		labelrows.show();
+		labelcSpac.show();
+		labelrSpac.show();
+		labelwSize.show();
+		labelwLength.show();
+		labelwOff.show();
+		labelwS.show();
+		LabelRx.show();
+		LabelRy.show();
+		LabelRz.show();
+		LabeltrX.show();
+		LabeltrY.show();
+		LabelSCLOBJ.show();
+}
+
+function hideSlider3d(){
+		objMenu.hide();
+		labelOBJS.hide();
+		columnsSlider.hide(); 
+		rowsSlider.hide();
+		xSpaceSlider.hide();
+		ySpaceSlider.hide();
+		yWaveSizeSlider.hide();
+		yWaveLengthSlider.hide();
+		yWaveOffsetSlider.hide();
+		yWaveSpeedSlider.hide();
+		objSlider.hide();
+		traXslider.hide();
+		traYslider.hide(); 
+		rotXslider.hide();
+		rotYslider.hide();   
+		rotZslider.hide();	
+
+		//labels
+		labelcolumns.hide();
+		labelrows.hide();
+		labelcSpac.hide();
+		labelrSpac.hide();
+		labelwSize.hide();
+		labelwLength.hide();
+		labelwOff.hide();
+		labelwS.hide();
+		LabelRx.hide();
+		LabelRy.hide();
+		LabelRz.hide();
+		LabeltrX.hide();
+		LabeltrY.hide();
+		LabelSCLOBJ.hide();
+}
+
+function showSliderAudio(){
+	traXslider.show();
+    traYslider.show(); 
+
+	//labels
+	LabeltrX.show();
+	LabeltrY.show();
+}
+
+function hideSliderAudio(){
+	traXslider.hide();
+	traYslider.hide();
+
+	//labels
+	LabeltrX.hide();
+	LabeltrY.hide();
+}
+
+function showSliderBouncy(){
+	clrSliderStrokeR.show();
+	clrSliderStrokeG.show();
+	clrSliderStrokeB.show();
+	clrSliderSpeed.show();
+	clrSliderQuantity.show();
+	clrSliderRotate.show();
+	clrSliderWidth.show();
+	clrSliderHeight.show();
+
+	//labels
+
+	LabelStrokeR.show(); 
+	LabelStrokeG.show(); 
+	LabelStrokeB.show(); 
+	LabelSpeed.show(); 
+	LabelQuantity.show(); 
+	LabelRotate.show(); 
+	LabelWidth.show(); 
+	LabelHeight.show(); 
+}
+
+function hideSliderBouncy(){
+	clrSliderStrokeR.hide();
+	clrSliderStrokeG.hide();
+	clrSliderStrokeB.hide();
+	clrSliderSpeed.hide();
+	clrSliderQuantity.hide();
+	clrSliderRotate.hide();
+	clrSliderWidth.hide();
+	clrSliderHeight.hide();
+
+	//labels
+
+	LabelStrokeR.hide(); 
+	LabelStrokeG.hide(); 
+	LabelStrokeB.hide(); 
+	LabelSpeed.hide(); 
+	LabelQuantity.hide(); 
+	LabelRotate.hide(); 
+	LabelWidth.hide(); 
+	LabelHeight.hide(); 
+}
+
+function updateSlider() {
+	columnsSlider.html("sliderValue:" + columnsSlider.value());
+	rowsSlider.html("sliderValue:" + rowsSlider.value());
+	xSpaceSlider.html("sliderValue:" + xSpaceSlider.value());
+	ySpaceSlider.html("sliderValue:" + ySpaceSlider.value());
+	yWaveSizeSlider.html("sliderValue:" + yWaveSizeSlider.value());
+	yWaveLengthSlider.html("sliderValue:" + yWaveLengthSlider.value());
+	yWaveOffsetSlider.html("sliderValue:" + yWaveOffsetSlider.value());
+	yWaveSpeedSlider.html("sliderValue:" + yWaveSpeedSlider.value());
+	clrSlider.html("sliderValue:" + clrSlider.value());
+	clrSliderG.html("sliderValue:" + clrSliderG.value());
+	clrSliderB.html("sliderValue:" + clrSliderB.value());
+	fadeSlider.html("sliderValue:" + fadeSlider.value());
+	objSlider.html("sliderValue:" + objSlider.value());
+	rotXslider.html("sliderValue:" + rotXslider.value());
+	rotYslider.html("sliderValue:" + rotXslider.value());
+	rotZslider.html("sliderValue:" + rotXslider.value());
+	txtS.html("sliderValue:" + txtS.value());
+	traXslider.html("sliderValue:" + traXslider.value());
+	traYslider.html("sliderValue:" + traYslider.value());
+
+	
+	//
+	if(mode == 3) {
+		genType()
+	} else if(mode == 4) {
+		genType()
+	} if(mode == 5) {
+		genType()
+	}
+
+}
+
+////////////////////////////////	
+////////////////////////////////	
+//CREATE LABELS
+
+function labels() {
+	labelcolumns = createDiv("Columns:"); //create Div
+	labelcolumns.position(windowWidth-250, 200); //position label
+	labelcolumns.style('color','#fff');
+	labelcolumns.style('font-size','12px');
+	labelcolumns.style('font-family','GT_CineType_Reg');
+	
+	labelrows = createDiv("Rows:"); //create Div
+	labelrows.position(windowWidth-250, 225); //position label
+	labelrows.style("color", '#fff');
+	labelrows.style("font-size", '12px');
+	labelrows.style("font-family", 'GT_CineType_Reg');
+
+	labelcSpac = createDiv("Column spacing:"); //create Div
+	labelcSpac.position(windowWidth-250, 250); //position label
+	labelcSpac.style("color", '#fff');
+	labelcSpac.style("font-size", '12px');
+	labelcSpac.style("font-family", 'GT_CineType_Reg');
+
+	labelrSpac = createDiv("Row spacing:"); //create Div
+	labelrSpac.position(windowWidth-250, 275); //position label
+	labelrSpac.style("color", '#fff');
+	labelrSpac.style("font-size", '12px');
+	labelrSpac.style("font-family", 'GT_CineType_Reg');
+
+	labelwSize = createDiv("Animate char:"); //create Div
+	labelwSize.position(windowWidth-250, 300); //position label
+	labelwSize.style("color", '#fff');
+	labelwSize.style("font-size", '12px');
+	labelwSize.style("font-family", 'GT_CineType_Reg');
+
+	labelwLength = createDiv("Shear char:"); //create Div
+	labelwLength.position(windowWidth-250, 325); //position label
+	labelwLength.style("color", '#fff');
+	labelwLength.style("font-size", '12px');
+	labelwLength.style("font-family", 'GT_CineType_Reg');
+
+	labelwOff = createDiv("Offset:"); //create Div
+	labelwOff.position(windowWidth-250, 350); //position label
+	labelwOff.style("color", '#fff');
+	labelwOff.style("font-size", '12px');
+	labelwOff.style("font-family", 'GT_CineType_Reg');
+
+	labelwS = createDiv("Speed:"); //create Div
+	labelwS.position(windowWidth-250, 375); //position label
+	labelwS.style("color", '#fff');
+	labelwS.style("font-size", '12px');
+	labelwS.style("font-family", 'GT_CineType_Reg');
+
+	LabelTsize = createDiv("TextSize:"); //create Div
+	LabelTsize.position(190,200); //position label
+	LabelTsize.style("color", '#fff');
+	LabelTsize.style("font-size", '12px');
+	LabelTsize.style("font-family", 'GT_CineType_Reg');
+
+	LabelFade = createDiv("Fade:"); //create Div
+	LabelFade.position(190, 225); //position label
+	LabelFade.style("color", '#fff');
+	LabelFade.style("font-size", '12px');
+	LabelFade.style("font-family", 'GT_CineType_Reg');
+	
+	LabelSCLOBJ = createDiv("Scale 3D OBJ:"); //create Div
+	LabelSCLOBJ.position(windowWidth-250, 400); //position label
+	LabelSCLOBJ.style("color", '#fff');
+	LabelSCLOBJ.style("font-size", '12px');
+	LabelSCLOBJ.style("font-family", 'GT_CineType_Reg');
+	
+	LabeltrX = createDiv("Translate X:"); //create Div
+	LabeltrX.position(windowWidth-250, 425); //position label
+	LabeltrX.style("color", '#fff');
+	LabeltrX.style("font-size", '12px');
+	LabeltrX.style("font-family", 'GT_CineType_Reg');
+	
+	LabeltrY = createDiv("Translate Y:"); //create Div
+	LabeltrY.position(windowWidth-250, 450); //position label
+	LabeltrY.style("color", '#fff');
+	LabeltrY.style("font-size", '12px');
+	LabeltrY.style("font-family", 'GT_CineType_Reg');
+
+
+	/*LabelR = createDiv("Color R:"); //create Div
+	LabelR.position(190, 250); //position label
+	LabelR.style("color", '#fff');
+	LabelR.style("font-size", '12px');
+	LabelR.style("font-family", 'GT_CineType_Reg');*/
+
+	//Back R = background Red
+	LabelR = createDiv("BG color R:"); //create Div
+	LabelR.position(190, 250); //position label
+	LabelR.style("color", '#fff');
+	LabelR.style("font-size", '12px');
+	LabelR.style("font-family", 'GT_CineType_Reg');
+	//Back G = background Green
+	LabelG = createDiv("BG color G:"); //create Div
+	LabelG.position(190, 275); //position label
+	LabelG.style("color", '#fff');
+	LabelG.style("font-size", '12px');
+	LabelG.style("font-family", 'GT_CineType_Reg');
+	//Back B = background Blue
+	LabelB = createDiv("BG color B:"); //create Div
+	LabelB.position(190,300); //position label
+	LabelB.style("color", '#fff');
+	LabelB.style("font-size", '12px');
+	LabelB.style("font-family", 'GT_CineType_Reg');
+
+	LabelFillR = createDiv("Fill color R:"); //create Div
+	LabelFillR.position(190,325); //position label
+	LabelFillR.style("color", '#fff');
+	LabelFillR.style("font-size", '12px');
+	LabelFillR.style("font-family", 'GT_CineType_Reg');
+	//Fill G
+	LabelFillG = createDiv("Fill color G:"); //create Div
+	LabelFillG.position(190,350); //position label
+	LabelFillG.style("color", '#fff');
+	LabelFillG.style("font-size", '12px');
+	LabelFillG.style("font-family", 'GT_CineType_Reg');
+	//Fill B
+	LabelFillG = createDiv("Fill color B:"); //create Div
+	LabelFillG.position(190,375); //position label
+	LabelFillG.style("color", '#fff');
+	LabelFillG.style("font-size", '12px');
+	LabelFillG.style("font-family", 'GT_CineType_Reg');
+
+	//Stroke Weight
+	LabelStrokeW = createDiv("St. Weight:"); //create Div
+	LabelStrokeW.position(190,400); //position label
+	LabelStrokeW.style("color", '#fff');
+	LabelStrokeW.style("font-size", '12px');
+	LabelStrokeW.style("font-family", 'GT_CineType_Reg');
+////////////////////////
+	LabelRx = createDiv("Rotate X:"); //create Div
+	LabelRx.position(windowWidth-250,475); //position label
+	LabelRx.style("color", '#fff');
+	LabelRx.style("font-size", '12px');
+	LabelRx.style("font-family", 'GT_CineType_Reg');
+	
+	LabelRy = createDiv("Rotate Y:"); //create Div
+	LabelRy.position(windowWidth-250,500); //position label
+	LabelRy.style("color", '#fff');
+	LabelRy.style("font-size", '12px');
+	LabelRy.style("font-family", 'GT_CineType_Reg');
+	
+	LabelRz = createDiv("Rotate Z:"); //create Div
+	LabelRz.position(windowWidth-250,525); //position label
+	LabelRz.style("color", '#fff');
+	LabelRz.style("font-size", '12px');
+	LabelRz.style("font-family", 'GT_CineType_Reg');
+//////////////////
+	/*labelC1 = createDiv("CanvasWidth"); //create Div
+	labelC1.position(windowWidth - 210, 40); //position label
+	labelC1.style("color", '#fff');
+	labelC1.style("font-size", '8');
+	labelC1.style("font-family", 'sans-serif');*/
+	
+	labelC2 = createDiv("CanvasHeight in px"); //create Div
+	labelC2.position(190, windowHeight-155); //position label
+	labelC2.style("color", '#fff');
+	labelC2.style("font-size", '12px');
+	labelC2.style("font-family", 'GT_CineType_Reg');
+
+	labelMainT = createDiv("Header"); //create Div
+	labelMainT.position(20, 200); //position label
+	labelMainT.style("color", '#fff');
+	labelMainT.style("font-size", '12px');
+	labelMainT.style("font-family", 'GT_CineType_Reg');
+	labelMainT.style("text-align", 'right');
+
+	labelAudioT = createDiv("Footer"); //create Div
+	labelAudioT.position(20, 350); //position label
+	labelAudioT.style("color", '#fff');
+	labelAudioT.style("font-size", '12px');
+	labelAudioT.style("font-family", 'GT_CineType_Reg');
+
+	labelAudioT = createDiv("Export Layers"); //create Div
+	labelAudioT.position(20, windowHeight-155); //position label
+	labelAudioT.style("color", '#fff');
+	labelAudioT.style("font-size", '12px');
+	labelAudioT.style("font-family", 'GT_CineType_Reg');
+
+	//scale
+
+	labelSCL = createDiv("Display Scale"); //create Div
+	labelSCL.position(190, windowHeight-100); //position label
+	labelSCL.style("color", '#fff');
+	labelSCL.style("font-size", '12px');
+	labelSCL.style("font-family", 'GT_CineType_Reg');
+	
+	labelModes = createDiv("Choose Mode"); //create Div
+	labelModes.position(20, 60); //position label
+	labelModes.style("color", '#fff');
+	labelModes.style("font-size", '12px');
+	labelModes.style("font-family", 'GT_CineType_Reg');
+
+	labelOBJS = createDiv("Choose 3D Object"); //create Div
+	labelOBJS.position(windowWidth-250, 145); //position label
+	labelOBJS.style("color", '#fff');
+	labelOBJS.style("font-size", '12px');
+	labelOBJS.style("font-family", 'GT_CineType_Reg');
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+//Stroke R
+	LabelStrokeR = createDiv("Stroke R:"); //create Div
+	LabelStrokeR.position(windowWidth-250, 200); //position label
+	LabelStrokeR.style("color", '#fff');
+	LabelStrokeR.style("font-size", '12px');
+	LabelStrokeR.style("font-family", 'GT_CineType_Reg');
+	//Stroke G
+	LabelStrokeG = createDiv("Stroke G:"); //create Div
+	LabelStrokeG.position(windowWidth-250, 225); //position label
+	LabelStrokeG.style("color", '#fff');
+	LabelStrokeG.style("font-size", '12px');
+	LabelStrokeG.style("font-family", 'GT_CineType_Reg');
+	//Stroke B
+	LabelStrokeB = createDiv("Stroke B:"); //create Div
+	LabelStrokeB.position(windowWidth-250, 250); //position label
+	LabelStrokeB.style("color", '#fff');
+	LabelStrokeB.style("font-size", '12px');
+	LabelStrokeB.style("font-family", 'GT_CineType_Reg');
+	
+
+	//Speed
+	LabelSpeed = createDiv("Speed:"); //create Div
+	LabelSpeed.position(windowWidth-250, 275); //position label
+	LabelSpeed.style("color", '#fff');
+	LabelSpeed.style("font-size", '12px');
+	LabelSpeed.style("font-family", 'GT_CineType_Reg');
+	//Quantity
+	LabelQuantity = createDiv("Quantity:"); //create Div
+	LabelQuantity.position(windowWidth-250, 300); //position label
+	LabelQuantity.style("color", '#fff');
+	LabelQuantity.style("font-size", '12px');
+	LabelQuantity.style("font-family", 'GT_CineType_Reg');
+	//Rotate
+	LabelRotate = createDiv("Rotate:"); //create Div
+	LabelRotate.position(windowWidth-250, 325); //position label
+	LabelRotate.style("color", '#fff');
+	LabelRotate.style("font-size", '12px');
+	LabelRotate.style("font-family", 'GT_CineType_Reg');
+	//Width
+	LabelWidth = createDiv("Width:"); //create Div
+	LabelWidth.position(windowWidth-250, 350); //position label
+	LabelWidth.style("color", '#fff');
+	LabelWidth.style("font-size", '12px');
+	LabelWidth.style("font-family", 'GT_CineType_Reg');
+	//Height
+	LabelHeight = createDiv("Height:"); //create Div
+	LabelHeight.position(windowWidth-250, 375); //position label
+	LabelHeight.style("color", '#fff');
+	LabelHeight.style("font-size", '12px');
+	LabelHeight.style("font-family", 'GT_CineType_Reg');
+
+}
+
+
+function changeObject() {
+for (let i=0; i< objNames.length; i++)
+	{	
+		if (objMenu.value() == i)
+		{
+		myModel = objFiles[objMenu.value()];
+		}
+	}
+}
+
+function changeModes(){
+    if(sel.value()=='Home'){
+        mode=1;
+    } else if(sel.value()=='3D Mode'){
+        mode=2;
+    } else if(sel.value()=='AudioReactive'){
+        mode=3;
+    } else if(sel.value()=='AudioReactiveNoBG'){
+        mode=4;
+    } else if(sel.value()=='Bouncy'){
+        mode=5;
+    } else if(sel.value()=='AudioSpiral'){
+        mode=6;
+	}
+    
+	/*'Home'
+  ('3D Mode');
+  ('Audio BW');
+  ('Audio BW Fade');
+  ('Audio Color');*/
+    
+}
+
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//CLEAR LAYERS // RESET
+function clearLayers(){
+og.clear();
+typeLayer.clear();
+layer3D.clear();
+soundLayer.clear();
+graphicLayer.clear();
+}
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+// function(stopMove){
+// 	noLoop();
+// }
+
+// function(startAnimation){
+// 	loop();
+// }
+
+/////////////////////////////////////////////////
+/////////////////////// ** FUNCTION FOR EXPORT **
+
+
+function saveOutput3D(){
+layer3D.save('3D.png');
+}
+
+function saveOutputSound(){
+//soundLayer.background(0,0);	
+soundLayer.save('SoundLayer.png');
+}
+
+function saveOutputInfo(){
+graphicLayer.save('graphicLayer.png');
+}
+
+function saveOutputPoster(){
+og.save('Poster.png');
+}
+
+//TED's IMAGE OUTPUT
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    og.save(filename); 
+} 
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+
+class Header {
+	constructor(txt, x, y, s) {
+		this.txt = txt;
+		this.x = x;
+		this.y = y;
+		this.s = s;
+	}
+	//update() {
+	//	if(mouseIsPressed) {
+	//		this.x = mouseX;
+	//		this.y = mouseY;
+	//	}
+
+	display() {
+		push();
+		infoLayer.textAlign(CENTER);
+		infoLayer.fill(255);
+		infoLayer.textSize(this.s);
+		infoLayer.text(this.txt, this.x, this.y);
+		pop();
+	}
+}
+
+class Footer {
+	constructor(txt, x, y, s) {
+		this.txt = txt;
+		this.x = x;
+		this.y = y;
+		this.s = s;
+	}
+
+	display() {
+		push();
+		infoLayer.textAlign(CENTER);
+		infoLayer.fill(255);
+		infoLayer.textSize(this.s);
+		infoLayer.text(this.txt, this.x, this.y);
+		pop();
+	}
+}
+
+/* AUDIO INIT */
+let mic, fftRaw, fft, waveform, amp = 0.0,
+	ampStereo = {
+		l: 0.0,
+		r: 0.0
+	},
+	ampEase = 0.0,
+	numBins = 512,
+	bands = 12;
+
+function setupAudio() {
+	userStartAudio();
+	mic = new p5.AudioIn();
+	mic.start();
+	fftRaw = new p5.FFT(0.75, numBins);
+	fftRaw.setInput(mic);
+}
+
+function updateAudio() {
+	fftRaw.analyze();
+	amp = mic.getLevel() * 1000; // average mixed amplitude
+	ampStereo.l = mic.amplitude.getLevel(0) * 500; // average left amplitude
+	ampStereo.r = mic.amplitude.getLevel(1) * 500; // average right amplitude
+	ampEase = ease(amp, ampEase, 0.075); // smooth 'amp'
+	waveform = fftRaw.waveform(); // array (-1, 1)
+	fft = fftRaw.logAverages(fftRaw.getOctaveBands(bands)); // array (0, 255)
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>
