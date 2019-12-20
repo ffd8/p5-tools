@@ -37,7 +37,7 @@ let t1;
 let t2 = "shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders - shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -shady shaders -"
 
 let songNames = ['infinity 2008', "80's vampire car chase", "Cha-cha", "Non più andrai"];
-let songLoc = ["assets/infinity-2008.mp3", "assets/80_s_Vampire_Car_Chase.mp3", "assets/ChaCha_Fontanez.mp3", "assets/Non_Piu_Andrai_comp.mp3"];
+let songLoc = ["assets/infinity-2008.mp3", "assets/80_s_Vampire_Car_Chase.mp3", "assets/ChaCha_Fontanez.mp3", "assets/Non_Piu_Andrai.mp3"];
 let songFiles = [];
 
 function preload() {
@@ -737,7 +737,6 @@ let mic, fftRaw, fft, waveform, amp = 0.0,
   bands = 12;
 
 function setupAudio() {
-	userStartAudio();
 	mic = new p5.AudioIn();
 	mic.start();
 	fftRaw = new p5.FFT(0.75, numBins);

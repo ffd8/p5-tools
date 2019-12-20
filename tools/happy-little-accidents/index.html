@@ -11,7 +11,6 @@
 		body{
 			margin:0;
 			overflow:hidden;
-			background:#000;
 		}
 		canvas{
 			position:fixed;
@@ -44,6 +43,14 @@ var credits = {
 } 
 
 
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); 
+} 
+
+
 //DT_36_FINAL_style_2_20191219102456
 
 let ll = [],
@@ -65,7 +72,7 @@ function setup() {
 
 	//  DROP DOWN MENU  ////////////////////////
 	sel = createSelect();
-	sel.position(width * 0.03, height * 0.16);
+	sel.position(width * 0.03, height * 0.2);
 	sel.option('');
 	sel.changed(selDrawing);
 	sel.style('font-family', 'Helvetica');
@@ -76,7 +83,7 @@ function setup() {
 	//  COLOR SLIDER  ////////////////////////////
 	colorMode(HSB);
 	sliderC = createSlider(0, 340, 0, 10);
-	sliderC.position(width * 0.03, height * 0.25);
+	sliderC.position(width * 0.03, height * 0.29);
 	sliderC.input(changeCol);
 	sliderC.style('width', '130px');
 	sliderC.style('height', '3px');
@@ -86,9 +93,9 @@ function setup() {
 	sliderC.style('-webkit-appearance: none');
 	sliderC.style('outline: none');
 
-	//  STROKE WEIGHT SLIDER  ////////////////////
+	//  THICKNESS SLIDER  ////////////////////
 	sliderW = createSlider(1, 30, 5);
-	sliderW.position(width * 0.03, height * 0.34);
+	sliderW.position(width * 0.03, height * 0.365);
 	sliderW.input(changeWeight);
 	sliderW.style('height', '3px');
 	sliderW.style('appearance', 'none');
@@ -99,7 +106,7 @@ function setup() {
 
 	//  STROKE SCALE SLIDER /////////////////////////
 	sliderSc = createSlider(1.0, 5.0, 1.0, 0.1);
-	sliderSc.position(width * 0.03, height * 0.43);
+	sliderSc.position(width * 0.03, height * 0.44);
 	sliderSc.input(changeScale);
 	sliderSc.style('height', '3px');
 	sliderSc.style('appearance', 'none');
@@ -111,7 +118,7 @@ function setup() {
 
 	//  ROTATION SLIDER /////////////////////////
 	sliderRot = createSlider(-10, 10, 0, 0.01);
-	sliderRot.position(width * 0.03, height * 0.61);
+	sliderRot.position(width * 0.03, height * 0.615);
 	sliderRot.input(changeRot);
 	sliderRot.style('height', '3px');
 	sliderRot.style('appearance', 'none');
@@ -191,8 +198,9 @@ function draw() {
 	push();
 	rectMode(CORNER);
 	strokeWeight(3);
+	//rect(0,0, 100, 60);
 	//rect(width * 0.819, height * 0.004, width * 0.18, height * 0.99);
-	rect(width * 0.0029, 60, width * 0.18, height-70);
+	rect(width * 0.0029, height * 0.09, width * 0.18, height * 0.905);
 	pop();
 
 	//  TEXT IN TOOL BAR  ///////////////////
@@ -202,26 +210,26 @@ function draw() {
 	textSize(12);
 	textFont('Sporting Grotesque');
 	textAlign(LEFT);
-	text("CHOOSE LINE", width * 0.03, height * 0.15);
-	text("STROKE COLOR", width * 0.03, height * 0.24);
-	text("STROKE WEIGHT", width * 0.03, height * 0.33);
-	text("SCALE", width * 0.03, height * 0.42);
-	text("CHANGE LINE", width * 0.03, height * 0.51);
-	text("ROTATION", width * 0.03, height * 0.60);
+	text("CHOOSE", width * 0.03, height * 0.19);
+	text("COLOR", width * 0.03, height * 0.278);
+	text("THICKNESS", width * 0.03, height * 0.355);
+	text("SCALE", width * 0.03, height * 0.43);
+	text("SHAPE", width * 0.03, height * 0.51);
+	text("ROTATION", width * 0.03, height * 0.6);
 	text("MOTION", width * 0.03, height * 0.69);
 	//text("", width * 0.8, height * 0.7);
 	text("SOUND", width * 0.03, height * 0.78);
-	text("PARTY MODE", width * 0.03, height * 0.865);
+	text("PARTY!", width * 0.03, height * 0.87);
 	pop();
 
 	push();
 	fill(255);
 	noStroke();
 	textAlign(LEFT);
-	textSize(20);
+	textSize(15);
 	textFont('Sporting Grotesque');
-	// textStyle(BOLD);
-	// text("HAPPY LITTLE \nACCIDENTS", width * 0.03, height * 0.07);
+	textStyle(BOLD);
+	text("DRAW SOMETHING!", width * 0.03, height * 0.14);
 	pop();
 
 	// DISPLAY CLASS DRAWLINE
@@ -508,13 +516,6 @@ class DrawLine {
 }
 
 
-function saveFrame(toolName){ 
-    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
-    let filename = toolName + '_' + timestamp + '.png'; 
-    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
-    save(filename); 
-} 
-
 
 /* AUDIO INIT */
 let mic, fftRaw, fft, waveform, amp = 0.0,
@@ -527,7 +528,6 @@ let mic, fftRaw, fft, waveform, amp = 0.0,
 	bands = 12;
 
 function setupAudio() {
-	userStartAudio();
 	mic = new p5.AudioIn();
 	mic.start();
 	fftRaw = new p5.FFT(0.75, numBins);

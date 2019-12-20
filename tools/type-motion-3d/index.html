@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>3D_Type_Motion_Lu&Alex</title>
+	<meta charset="utf-8">
+	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/addons/p5.sound.min.js"></script>
+	<style type="text/css">
+		body{
+			margin:0;
+			overflow:hidden;
+		}
+		canvas{
+			position:fixed;
+			top:0;
+			left:0;
+			z-index:-1;
+			width:100vw;
+			height:100vh;
+			margin:0;
+		}
+	</style>
+	<script type="text/javascript">
+		// eco-mode = only render if window focused
+		window.onblur = function () {
+			noLoop()
+		}
+		window.onfocus = function () {
+			loop();
+		}
+	</script>
+<script type="text/javascript">
+//FINALE_003
+
+var credits = { 
+    "names" : [ 
+        "Zian Lu" // link to website if you have it <a href="URL" target="_blank">first.lastname</a> 
+        ,"Alexandre Nielbo" 
+    ] 
+    ,"class" : "MA" 
+    ,"description" : "Based on the function ’Text to Points’, We create a tool which can help you to create your personal version for different typeface. These typeface are composited by different shapes, including 2D and 3D shape. You can easily type the word which you like and use the sliders on the right top to change the wave mode, wave speed and the size of the shapes." 
+} 
+
+function saveFrame(toolName){ 
+    let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
+    let filename = toolName + '_' + timestamp + '.png'; 
+    // filename = toolName + '.png'; // uncomment to remove timestamp from name 
+    save(filename); // layer.save(filename); 
+} 
+    
+let input;
+let pts;
+let myFont;
+let bounds;
+let bg3, bg3label
+let vextra =40
+let sel, sel2;
+let noisex, labelnx
+let noisex2, labelnx2
+let fontList = [];
+
+let title1, subtitle1
+let credits1, credits2
+let sliderW, labelW  //Size of w
+let sliderW2,labelW2 //Speed of w
+let sliderWi,labelWi //the i of w
+let sliderL, labelL
+let sliderWave, labelWave
+let sliderrotX, labelrotX
+let sliderrotY, labelrotY
+let sliderdistZ, labeldistZ
+let sliderdistrot,labeldistrot
+let click;
+let txt = 'NICE';
+
+
+function preload() {
+	fontList.push(loadFont('data/fonts/HelveticaNeueLTGE-Bold.otf'));
+	
+	fontList.push(loadFont('data/fonts/MinionPro-Semibold.otf'));
+	
+	fontList.push(loadFont('data/fonts/Das_Pixel2GX.ttf'));
+	//myFont = loadFont('data/fonts/Das_Pixel2GX.ttf');
+}
+
+
+
+function setup() {
+	createCanvas(windowWidth, windowHeight,WEBGL);
+	pixelDensity(1);
+	
+	angleMode(RADIANS)
+
+// INPUT
+  input = createInput(txt);
+  input.position(width-800, 110+vextra);
+  input.style('width', '154px');
+  input.style('height', '25px');
+  input.style('background-color','#fff');
+  input.style('border-radius','20px');
+  input.style('border-color','#000');
+  input.style('color','#000');
+  input.input(getPoints)
+  input.style('font-family','Helvetica');
+
+
+//SELECT
+
+	sel = createSelect();
+	sel.position(width-800, 30+vextra);
+	sel.option('BOX01');
+	sel.option('BOX02');
+	sel.option('BOX03');
+	sel.option('SPHERE01');
+	sel.option('SPHERE02');
+	sel.option('CONE01');
+		sel.style('font-family','Helvetica');
+		sel.style('font-weight','bold');
+		sel.style('font-size','12px');
+		sel.style('border-radius','20px');
+		sel.style('border-color','#fff');
+		sel.style('border-width','1px');
+		sel.style('width','160px');
+		sel.style('height','30px');
+		sel.style('background-color','#000');
+		sel.style('color','#fff');
+
+	sel2 = createSelect();
+	sel2.position(width-800, 70+vextra);
+	sel2.option('SANS', 0);
+	sel2.option('SERIF', 1);
+	sel2.option('PIXEL', 2);
+	sel2.value(0)
+	sel2.input(getPoints);
+
+		sel2.style('font-family','Helvetica');
+		sel2.style('font-weight','bold');
+		sel2.style('font-size','12px');
+		sel2.style('border-radius','20px');
+		sel2.style('border-color','#fff');
+		sel2.style('border-width','1px')
+		sel2.style('width','160px');
+		sel2.style('height','30px');
+		sel2.style('background-color','#000');
+		sel2.style('color','#fff');
+
+	//Sliders and Labels Start
+
+	bg3 = createSlider(0,255,0,1);
+	bg3.position (width-600,120+vextra);
+	bg3.style('width', '160px');
+	bg3label = createDiv('COLOR');
+	bg3label.position (width-600,105+vextra);
+	bg3label.style('color','#fff');
+	bg3label.style('font-family','sans-serif');
+	bg3label.style('font-size', '12px');
+	bg3label.style('fontWeight',"bold");
+	
+	
+	push()
+	translate(0,300)
+	
+	sliderW = createSlider(0, 150, 0,1);
+	sliderW.position(width-200, 40+vextra);
+	sliderW.style('width', '160px');
+	labelW = createDiv('HEIGHT');
+	labelW.position(width-200, 25+vextra);
+	labelW.style('color','#fff');
+	labelW.style('font-family','sans-serif');
+	labelW.style('font-size', '12px');
+	labelW.style('fontWeight',"bold");
+	
+  	sliderW2 = createSlider(0.01, 1, 0.01,0.01);
+	sliderW2.position(width-200, 80+vextra);
+	sliderW2.style('width', '160px');
+	labelW2 = createDiv('SPEED');
+	labelW2.position(width-200, 65+vextra);
+	labelW2.style('color','#fff');
+	labelW2.style('font-family','sans-serif');
+	labelW2.style('font-size', '12px');
+	labelW2.style('fontWeight',"bold");
+	
+	sliderWi = createSlider(0, 1, 0,0.01);
+	sliderWi.position(width-200, 120+vextra);
+	sliderWi.style('width', '160px');
+	labelWi = createDiv('i');
+	labelWi.position(width-200, 105+vextra);
+	labelWi.style('color','#fff');
+	labelWi.style('font-family','sans-serif');
+	labelWi.style('font-size', '12px');
+	labelWi.style('fontWeight',"bold");
+	
+	sliderL = createSlider(5, 50, 0,1);
+	sliderL.position(width-200, 160+vextra);
+	sliderL.style('width', '160px');
+	labelL = createDiv('LENGTH');
+	labelL.position(width-200, 145+vextra);
+	labelL.style('color','#fff');
+	labelL.style('font-family','sans-serif');
+	labelL.style('font-size', '12px');
+	labelL.style('fontWeight',"bold");
+ 
+ 	sliderWave = createSlider(0, 50, 0,1);
+	sliderWave.position(width-400, 40+vextra);
+	sliderWave.style('width', '160px');
+	labelWave = createDiv('WAVE');
+	labelWave.position(width-400, 25+vextra);
+	labelWave.style('color','#fff');
+	labelWave.style('font-family','sans-serif');
+	labelWave.style('font-size', '12px');
+	labelWave.style('fontWeight',"bold");
+	
+	sliderrotX = createSlider(0,200,0,1);
+	sliderrotX.position(width-400,80+vextra);
+	sliderrotX.style('width', '160px');
+	labelrotX = createDiv('ROT_X');
+	labelrotX.position(width-400, 65+vextra);
+	labelrotX.style('color','#fff');
+	labelrotX.style('font-family','sans-serif');
+	labelrotX.style('font-size', '12px');
+	labelrotX.style('fontWeight',"bold");
+	
+	sliderrotY = createSlider(0,200,0,1);
+	sliderrotY.position(width-400,120+vextra);
+	sliderrotY.style('width', '160px');
+	labelrotY = createDiv('ROT_Y');
+	labelrotY.position(width-400, 105+vextra);
+	labelrotY.style('color','#fff');
+	labelrotY.style('font-family','sans-serif');
+	labelrotY.style('font-size', '12px');
+	labelrotY.style('fontWeight',"bold");
+	
+	sliderrotZ = createSlider(0,200,0,1);
+	sliderrotZ.position(width-400,160+vextra);
+	sliderrotZ.style('width', '160px');
+	labelrotZ = createDiv('ROT_Z');
+	labelrotZ.position(width-400, 145+vextra);
+	labelrotZ.style('color','#fff');
+	labelrotZ.style('font-family','sans-serif');
+	labelrotZ.style('font-size', '12px');
+	labelrotZ.style('fontWeight',"bold");
+	
+	sliderdistZ = createSlider(-500,500,0,1);
+	sliderdistZ.position(width-600,40+vextra);
+	sliderdistZ.style('width', '160px');
+	labeldistZ = createDiv('DISTANCE');
+	labeldistZ.position(width-600, 25+vextra);
+	labeldistZ.style('color','#fff');
+	labeldistZ.style('font-family','sans-serif');
+	labeldistZ.style('font-size', '12px');
+	labeldistZ.style('fontWeight',"bold");
+	
+	//sliderdistrot,labeldistrot
+	sliderdistrot = createSlider(-100,100,0,0.5);
+	sliderdistrot.position(width-600,80+vextra);
+	sliderdistrot.style('width', '160px');
+	labeldistrot = createDiv('DIST/ROT');
+	labeldistrot.position(width-600, 65+vextra);
+	labeldistrot.style('color','#fff');
+	labeldistrot.style('font-family','sans-serif');
+	labeldistrot.style('font-size', '12px');
+	labeldistrot.style('fontWeight',"bold");
+	
+
+  	//Sliders and labels Ends
+pop();
+
+getPoints();
+}
+
+function getPoints() {
+	let txtSize = width / input.value().length/0.65;
+	let txtOptions = { //amounts of points using
+	sampleFactor: .10, //txt.length //0.15 //NEED TO AKE SLIDE!
+		simplifyThreshold: 0 }
+	pts = fontList[sel2.value()].textToPoints(input.value(), -10, 50, txtSize, txtOptions);
+	bounds = fontList[sel2.value()].textBounds(input.value(), -10, 50, txtSize,txtOptions);
+}
+
+
+function draw() {
+	background(0,0,bg3.value());
+	translate(-bounds.w / 2, bounds.h / 2,sliderdistZ.value());
+
+for(var i = 0; i < pts.length; i++) {
+		var pt = pts[i];
+
+	push();
+		translate(pt.x, pt.y);
+		let w = sin(i * sliderWi.value() + frameCount * sliderW2.value()) * sliderW.value();;
+		let wave = int(sin(frameCount * .001 + (i * 1)) * sliderWave.value());
+		rotateX(sin(i * 0.02 + frameCount * 0.001) * sliderrotX.value());
+		rotateY(sin(i * 0.02 + frameCount * 0.001) * sliderrotY.value());
+		rotateZ(sin(i * 0.02 + frameCount * 0.001) * sliderrotZ.value());
+		stroke(255);
+		lights();
+		noStroke();
+		translate(0,0,sliderdistrot.value());
+
+		if(sel.value() == 'BOX01') {
+		box(w+sliderL.value()+wave, wave+sliderL.value());
+		} else if(sel.value() == 'BOX02') {
+			
+			
+		box(w+sliderL.value()+wave,w+sliderL.value()+wave);
+
+		
+		} else if(sel.value() == 'BOX03') {
+		box(w+sliderWave.value(),w+sliderL.value()+wave);
+		} else if(sel.value() == 'SPHERE01') {
+		sphere(w+sliderL.value()+wave, wave+sliderL.value());
+		} else if(sel.value() == 'SPHERE02') {
+		sphere(w+sliderL.value()+wave, wave+sliderL.value());
+		} else if(sel.value() == 'CONE01') {
+		cone(w+sliderL.value()+ wave+sliderL.value());
+		}
+
+	pop();
+}
+}
+
+/* CUSTOM FUNCTIONS FOR P5LIVE */
+// keep fullscreen if window resized
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+// custom ease function
+function ease(iVal, oVal, eVal){
+	let targetX = iVal;
+	let dx = targetX - oVal; 
+	return oVal += dx * eVal;
+}
+
+// processing compatibility
+function println(msg){
+	print(msg);
+}
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

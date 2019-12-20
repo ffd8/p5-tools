@@ -132,7 +132,7 @@ let myModel;
 let pts;
 let font;
 let bounds;
-let txtA, txtSize, txtOptions;
+let txt, txtSize, txtOptions;
 let soundLayer;
 ////////////////////////////
 ////////////////////////////
@@ -152,7 +152,7 @@ sel = createSelect();
   sel.option('Home');
   sel.option('3D Mode');
   sel.option('AudioReactive');
-  sel.option('AudioReactiveNoBG');
+  //sel.option('AudioReactiveNoBG');
   sel.option('Bouncy');
   sel.option('AudioSpiral');
   sel.style('color','#fff');
@@ -305,15 +305,15 @@ objMenu = createSelect();
 	scl.style('background-color','#000');
 	scl.style('text-align','center');     
 ///
-	th1.input(updateInput);
-	th2.input(updateInput);
-	th3.input(updateInput);
-	th4.input(updateInput);
-	tf1.input(updateInput);
-	tf2.input(updateInput);
-	tf3.input(updateInput);
-	tf4.input(updateInput);
-	scl.input(updateInput);
+	// th1.input(updateInput);
+	// th2.input(updateInput);
+	// th3.input(updateInput);
+	// th4.input(updateInput);
+	// tf1.input(updateInput);
+	// tf2.input(updateInput);
+	// tf3.input(updateInput);
+	// tf4.input(updateInput);
+	// scl.input(updateInput);
 	////////////////////////////
 //RESET BUTTON
 	buttonClear = createButton('RESET CANVAS');
@@ -423,30 +423,31 @@ objMenu = createSelect();
 	////////////////////////////
 	//ADDING AUDIO TXT INPUTS
 	//audio add ons drawmode4
-	inp2 = createInput('AUDIO TEXT');
-	inp2.position(20, 150).style('width', '125px');
-	inp2.style('color','#fff');
-    inp2.style('font-size','10px');
-    inp2.style('font-family','GT_CineType_Reg');
-    inp2.style('height','20px');
-    inp2.style('border-color','#000');
-    inp2.style('border-width','1px');
-    inp2.style('border-radius','5px');
-    inp2.style('background-color','#000');
-    inp2.style('text-align','center')
+	// inp2 = createInput('AUDIO TEXT');
+	// inp2.position(20, 120).style('width', '125px');
+	// inp2.style('color','#fff');
+    // inp2.style('font-size','10px');
+    // inp2.style('font-family','GT_CineType_Reg');
+    // inp2.style('height','20px');
+    // inp2.style('border-color','#000');
+    // inp2.style('border-width','1px');
+    // inp2.style('border-radius','5px');
+    // inp2.style('background-color','#000');
+    // inp2.style('text-align','center')
 
-	inp2.input(updateInputA);
-	txtA = 'O';
+	// inp2.input(updateInput);
+	// txtA = 'O';
 	txtSize = 350; //txtS.value() -> doesn't work | maybe try 2 * window.innerWidth + size?
 	txtOptions = { //amounts of points using
 		sampleFactor: .15,
 		simplifyThreshold: 0
 	}
+	updateInput();
 	genType()
 	//end of audio add ons dm4
 	////////////////////////////
 
-	updateInput();
+	
 	imageMode(CENTER)
 	setupAudio();
 	og.angleMode(DEGREES);
@@ -464,19 +465,21 @@ function createLayers(){
 }
 
 function genType() {
-	pts = font.textToPoints(txtA, 0, 0, txtS.value(), txtOptions)
-	bounds = font.textBounds(txtA, 0, 0, txtS.value(), txtOptions);
+	pts = font.textToPoints(txt, 0, 0, txtS.value(), txtOptions)
+	bounds = font.textBounds(txt, 0, 0, txtS.value(), txtOptions);
 }
 
-function updateInputA() {
-	txtA = inp2.value();
-	genType()
-}
+// function updateInputA() {
+// 	txtA = inp2.value();
+// 	genType()
+// }
 
 function updateInput() {
 	//f1.txt = tf1.value()
 	txt = inp.value();
+	genType()
 }
+
 ////////////////////////////
 ////////////////////////////
 //MAIN DRAW FUNCTION
@@ -503,33 +506,39 @@ function draw() {
 		hideSlider3d();
 		hideSliderAudio();
 		hideSliderBouncy();
+		inp.hide();
 		drawmode1(); //DRAWING LAYER
 	} else if(mode == 2) {
 		hideSliderAudio();
 		hideSliderBouncy();
 		showSlider3d();
 		drawmode2();
-		
+		inp.show();
 	} else if(mode == 3) {
 		// 	columnsSlider.hide(); 
 		hideSlider3d();
 		hideSliderBouncy();
 		showSliderAudio();
 		drawmode3();
+		inp.show();
+	// } else if(mode == 4) {
+	// 	hideSlider3d();
+	// 	hideSliderBouncy();
+	// 	showSliderAudio();
+	// 	drawmode4();
 	} else if(mode == 4) {
 		hideSlider3d();
-		hideSliderBouncy();
-		showSliderAudio();
-		drawmode4();
+		hideSliderAudio();
+		showSliderBouncy();
+		inp.hide();
+		
+		drawmode5();
 	} else if(mode == 5) {
 		hideSlider3d();
 		hideSliderAudio();
 		showSliderBouncy();
-		drawmode5();
-	} else if(mode == 6) {
-		hideSlider3d();
-		hideSliderAudio();
-		showSliderBouncy();
+		inp.hide();
+		
 		drawmode6();
 	}
 
@@ -724,49 +733,49 @@ function drawmode3() {
 	og.image(soundLayer, 0, 0);
 }
 
-function drawmode4() {
-	/* audio vars: amp, ampEase, fft, waveform */
-	updateAudio();
+// function drawmode4() {
+// 	/* audio vars: amp, ampEase, fft, waveform */
+// 	updateAudio();
 	
-	soundLayer.imageMode(CENTER)
-	////////////////////////////////	* OPEN PARAMETERS WE CAN CHANGE 
-	//soundLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
-	//soundLayer.background(0,fadeSlider.value());
-	////////////////////////////////	
+// 	soundLayer.imageMode(CENTER)
+// 	////////////////////////////////	* OPEN PARAMETERS WE CAN CHANGE 
+// 	//soundLayer.background(clrSlider.value(), clrSliderG.value(), clrSliderB.value(), fadeSlider.value());
+// 	//soundLayer.background(0,fadeSlider.value());
+// 	////////////////////////////////	
 	
-	soundLayer.push();
-	soundLayer.translate(og.width / 2, og.height / 2);
-	soundLayer.translate((-bounds.w / 2)+traXslider.value(), (bounds.h / 2)+(traYslider.value()-((height*4)/3)));
-	for(var i = 0; i < pts.length; i++) {
-		var pt = pts[i];
-		let aWave = waveform[floor(map(i, 0, pts.length, 0, waveform.length))] * 50
-		let aFFT = fft[floor(map(i, 0, pts.length, 0, fft.length))]
-		soundLayer.push();
-		soundLayer.translate(pt.x, pt.y);
-		var w = sin(i * .01 + frameCount * 0.01) * aFFT / 60;
-		let wave = int(sin(frameCount * .001 + (i * 1000) * aWave) * aFFT / 200);
-		soundLayer.rotate(sin(i * 0.01 + frameCount * 0.001) * aFFT / 60);
-		soundLayer.noFill();
-		////////////////////////////////	* TWO POSSIBILITIES WE CAN CHOSE FROM
-		//soundLayer.stroke(clrSliderB.value(), clrSlider.value(), clrSliderG.value());
-		soundLayer.stroke(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value(),fadeSlider.value());
-		////////////////////////////////	
-		////////////////////////////////	
+// 	soundLayer.push();
+// 	soundLayer.translate(og.width / 2, og.height / 2);
+// 	soundLayer.translate((-bounds.w / 2)+traXslider.value(), (bounds.h / 2)+(traYslider.value()-((height*4)/3)));
+// 	for(var i = 0; i < pts.length; i++) {
+// 		var pt = pts[i];
+// 		let aWave = waveform[floor(map(i, 0, pts.length, 0, waveform.length))] * 50
+// 		let aFFT = fft[floor(map(i, 0, pts.length, 0, fft.length))]
+// 		soundLayer.push();
+// 		soundLayer.translate(pt.x, pt.y);
+// 		var w = sin(i * .01 + frameCount * 0.01) * aFFT / 60;
+// 		let wave = int(sin(frameCount * .001 + (i * 1000) * aWave) * aFFT / 200);
+// 		soundLayer.rotate(sin(i * 0.01 + frameCount * 0.001) * aFFT / 60);
+// 		soundLayer.noFill();
+// 		////////////////////////////////	* TWO POSSIBILITIES WE CAN CHOSE FROM
+// 		//soundLayer.stroke(clrSliderB.value(), clrSlider.value(), clrSliderG.value());
+// 		soundLayer.stroke(clrSliderFillR.value(), clrSliderFillG.value(), clrSliderFillB.value(),fadeSlider.value());
+// 		////////////////////////////////	
+// 		////////////////////////////////	
 
-		soundLayer.strokeWeight(clrSliderStrokeW.value()+aWave);
+// 		soundLayer.strokeWeight(clrSliderStrokeW.value()+aWave);
 
-		////////////////////////////////	
-		////////////////////////////////	* DRAW BOX / LINE / ELLIPSE -> FREE TO CHOSE, ELLIPSE WORKS BEST
+// 		////////////////////////////////	
+// 		////////////////////////////////	* DRAW BOX / LINE / ELLIPSE -> FREE TO CHOSE, ELLIPSE WORKS BEST
 
-		//soundLayer.box(2, 80 + w*aFFT, 10*w);
-		//soundLayer.line(2*aWave,2+w*aFFT,10,10)
+// 		//soundLayer.box(2, 80 + w*aFFT, 10*w);
+// 		//soundLayer.line(2*aWave,2+w*aFFT,10,10)
 
-		soundLayer.ellipse(2 * aWave, 2 + w * aFFT, 1)
-		soundLayer.pop();
-	}
-	soundLayer.pop();
-	og.image(soundLayer, 0, 0);
-}
+// 		soundLayer.ellipse(2 * aWave, 2 + w * aFFT, 1)
+// 		soundLayer.pop();
+// 	}
+// 	soundLayer.pop();
+// 	og.image(soundLayer, 0, 0);
+// }
 
 function drawmode5(){
 	graphicLayer.clear();
@@ -1345,13 +1354,14 @@ function changeModes(){
         mode=2;
     } else if(sel.value()=='AudioReactive'){
         mode=3;
-    } else if(sel.value()=='AudioReactiveNoBG'){
-        mode=4;
     } else if(sel.value()=='Bouncy'){
-        mode=5;
+        mode=4;
     } else if(sel.value()=='AudioSpiral'){
-        mode=6;
+        mode=5;
 	}
+
+	// else if(sel.value()=='AudioReactiveNoBG'){
+	//mode=4;
     
 	/*'Home'
   ('3D Mode');

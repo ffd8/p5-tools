@@ -143,10 +143,7 @@ function setup() {
 	layerGS.imageMode(CENTER);
 	layerCombo = createGraphics(height / 2, height / 2 * 1.4142);
 
-	let wby2 = width / 2;
-	let hby2 = (height - 100) / 2;
-	let wby4 = width / 4;
-	let hby4 = (height - 100) / 4;
+	
 
 	/////////////////////////////////////////////////////////////////////download button
 
@@ -163,12 +160,12 @@ function setup() {
 	/////////////////////////////////////////////////////////////////////checkbox
 
 	checkBW = createCheckbox('label', false);
-	checkBW.position(wby2 + 320, hby4 + 35);
+	checkBW.position(1080+90, 185+38);
 
 	/////////////////////////////////////////////////////////////////////get image button
 
 	button = createButton("Get Image");
-	button.position(wby2 + 250, hby4 - 35);
+	button.position(1080, 115+50);
 	button.size(330, 40);
 	button.mousePressed(getListImage);
 	button.style('border-color', '#ffffff');
@@ -180,7 +177,7 @@ function setup() {
 	/////////////////////////////////////////////////////////////////////get shape button
 
 	buttonGS = createButton("Get Shape");
-	buttonGS.position(wby2 + 250, hby4 + 185);
+	buttonGS.position(1080, 366+50);
 	buttonGS.size(330, 40);
 	buttonGS.mousePressed(getShape);
 	buttonGS.style('border-color', '#ffffff');
@@ -191,7 +188,7 @@ function setup() {
 	/////////////////////////////////////////////////////////////////////get quote button
 
 	buttonQuote = createButton("Get Quote");
-	buttonQuote.position(wby2 + 250, hby2 + 155);
+	buttonQuote.position(1080, 556+50);
 	buttonQuote.size(330, 40);
 	buttonQuote.mousePressed(displayQuote);
 	buttonQuote.style('border-color', '#ffffff');
@@ -201,31 +198,31 @@ function setup() {
 
 	/////////////////////////////////////////////////////////////////////color picker
 	colorPicker = createColorPicker("white");
-	colorPicker.position(wby2 + 350, hby2 + 320);
+	colorPicker.position(1080+70, 715+60);
 
 	/////////////////////////////////////////////////////////////////////text size
 	sliderTextSize = createSlider(0, 255, 60);
-	sliderTextSize.position(wby2 + 350, hby2 + 205);
+	sliderTextSize.position(1150, 660);
 	sliderTextSize.size(220, 20);
 
 	/////////////////////////////////////////////////////////////////////leading
 	sliderLeading = createSlider(0, 255, 50);
-	sliderLeading.position(wby2 + 350, hby2 + 235);
+	sliderLeading.position(1150, 690);
 	sliderLeading.size(220, 20);
 
 	/////////////////////////////////////////////////////////////////////Y pos
 	sliderY = createSlider(0, 1440, 0); //1440
-	sliderY.position(wby2 + 350, hby2 + 265);
+	sliderY.position(1150, 750);
 	sliderY.size(220, 20);
 	/////////////////////////////////////////////////////////////////////X pos
 	sliderX = createSlider(0, 1000, 0); //1000
-	sliderX.position(wby2 + 350, hby2 + 295);
+	sliderX.position(1150, 720);
 	sliderX.size(220, 20);
 
 	/////////////////////////////////////////////////////////////////////drop down topic
 
 	sel = createSelect();
-	sel.position(wby2 + 250, hby2 - 310);
+	sel.position(1080, 65+50);
 	sel.option('Endangered Species');
 	sel.option('Forest Fires');
 	sel.option('Soil Erosion');
@@ -248,7 +245,7 @@ function setup() {
 	/////////////////////////////////////////////////////////////////////shape sel
 
 	selGS = createSelect();
-	selGS.position(wby2 + 250, hby2 - 90);
+	selGS.position(1080, 315+50);
 	selGS.option('Straight');
 	selGS.option('Round');
 	selGS.changed(getShape);
@@ -265,7 +262,7 @@ function setup() {
 	/////////////////////////////////////////////////////////////////////fonts sel
 
 	fonts = createSelect();
-	fonts.position(wby2 + 250, hby2 + 100);
+	fonts.position(1080, 505+50);
 	fonts.option('AvenirLTPro-Book');
 	fonts.option('NapoleoneSlabITCStd');
 	fonts.option('CODE Bold');
@@ -293,41 +290,37 @@ function draw() {
 	let hby4 = (height - 100) / 4;
 
 	/////////////////////////////////////////////////////////////////////lines
-	line(wby4 - 350, 60 + 50, 705, 60 + 50);
-	line(wby2 - 60, 60 + 50, 735 + 675, 60 + 50);
-	line(wby2 - 60, 330 , 735 + 675, 330);
-	line(wby2 - 60, 520, 735 + 675, 520);
-	line(wby2 - 60, 760 + 50, 735 + 675, 760 + 50);
+	line(30, 50 + 50, 705, 50 + 50);
+	line(100, 50 + 50, 735 + 675, 50 + 50);
+	line(735, 300 + 50, 735 + 675, 300 + 50);
+	line(735, 490 + 50, 735 + 675, 490 + 50);
+	line(735, 760 + 80, 735 + 675, 760 + 80);
 	stroke(255);
-
 
 	push();
 	textLeading(20)
 	fill(255);
 	noStroke();
 	textSize(24);
-	text('Download to Earth', wby4 - 350, 35 + 50);
+	text('Download to Earth', 30, 35 + 50);
 	textSize(12);
-	text('Visuals for advocating \nclimate change awareness.', wby4, 22 + 50);
-	text('Academy of Art and Design Basel FHNW | HGK \nInstitute of Visual Communication', wby4 + 340, 22 + 50);
-	text('International Master of Graphic Design UIC/HGK \nDigital Culture, Lecturer. Ted Davis', wby2 + 250, 22 + 50);
-	text('Designed and built with all the love in the world by @MDes 2019, HGK. Currently v1.0.0-beta.1.', 30, 920);
-	text('Code licensed MDes 2019, FHNW HGK, docs CC BY 1.0.', 735, 920);
-	text('Greyscale', wby2 + 250, hby4 + 50);
-	text('Text Size', wby2 + 250, hby2 + 220);
-	text('Leading', wby2 + 250, hby2 + 250);
-	text('X Position', wby2 + 250, hby2 + 280);
-	text('Y Position', wby2 + 250, hby2 + 310);
-	text('Color', wby2 + 250, hby2 + 340);
-	text('Click on the "Save" button \non top to save your poster! ', wby4 + 650, 782 + 65);
+	text('Visuals for advocating \nclimate change awareness.', 366, 22 + 50);
+	text('Academy of Art and Design Basel FHNW | HGK \nInstitute of Visual Communication', 735, 22 + 50);
+	text('International Master of Graphic Design UIC/HGK \nDigital Culture, Lecturer. Ted Davis', 1080, 22 + 50);
+	text('Greyscale', 1080, 185+50);
+	text('Text Size', 1080, 625+50);
+	text('Leading', 1080, 655+50);
+	text('X Position', 1080, 685+50);
+	text('Y Position',1080, 715 + 50);
+	text('Color', 1080, 745 + 50);
+	text('Click on the "Save" button \non top to save your poster! ', 1080, 782 + 80);
 	textSize(16);
-	text('Preview', wby4 - 350, 72 + 80);
-	text('Image', wby4 + 340, 72 + 80);
-	text('Graphic Shape', wby4 + 340, 322 + 50);
-	text('Quote', wby4 + 340, 512 + 50);
-	text('You are good to go!', wby4 + 340, 782 + 65);
+	text('Preview', 30, 72 + 50);
+	text('Image', 735, 72 + 50);
+	text('Graphic Shape', 735, 322 + 50);
+	text('Quote', 735, 512 + 50);
+	text('You are good to go!', 735, 782 + 80);
 	pop();
-
 
 
 	if(img != undefined) {
