@@ -192,6 +192,8 @@
 		let root = document.documentElement;
 		let introName = 'P5-TOOLS';
 		let pingTimer;
+		let randTimer;
+		let randDelay = 15;
 		vex.defaultOptions.className = 'vex-theme-plain'
 
 		// eco-mode = only render if window focused
@@ -214,6 +216,9 @@
 		// load tool if in URL
 		if(window.location.hash){
 			curTool = window.location.hash.substring(1);
+			if(curTool == 'demo'){
+				slideShow();
+			}
 			selectTool(curTool);
 			p5select.value = curTool;
 		}else{
@@ -313,6 +318,12 @@
 			return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
 		}
 
+		function slideShow(){
+			var randTool = tools[Math.floor(Math.random() * tools.length)];
+			p5select.value = randTool;
+			selectTool(randTool);
+			randTimer = setTimeout(slideShow, randDelay*1000);
+		}
 
 
 		// about tool
@@ -329,7 +340,7 @@
 
 					,
 			})
-			console.log(tempAbout);
+			// console.log(tempAbout);
 		}
 
 		// save output of tool
