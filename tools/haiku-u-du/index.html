@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>AUB_HAIKU_U_DO_FINAL</title>
+	<title>AUB_HAIKU_U_DO_PT4_NO_RANDOM_INPUT</title>
 	<meta charset="utf-8">
 	<!-- Compiled w/ P5LIVE, http://github.com/ffd8/p5live -->
 	<script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js"></script>
@@ -11,7 +11,6 @@
 		body{
 			margin:0;
 			overflow:hidden;
-			background:#000;
 		}
 		canvas{
 			position:fixed;
@@ -32,60 +31,44 @@
 			loop();
 		}
 	</script>
-<script type="text/javascript" src="scripts/syllable.min.js"></script>
+<script type="text/javascript" src="data/scripts/syllable.min.js"></script>
 
 <script type="text/javascript">
-//AUB_HAIKU_U_DO_FINAL
+//AUB_HAIKU_U_DO_PT4_NO_RANDOM_INPUT
 
-let bkd, bkdOp, sliderCol;
-let txtPtsChk, waveFrmChk, ellipseChk, waveColChk, videoChk;
+let sliderCol, sliderBkd, sliderBkdCol;
+let txtPtsChk, waveFrmChk, ellipseChk, waveColChk, videoChk; //Ra;
 let filterSel, filterType;
-let font, img;
+let font;
 let typepoints = [];
 let haikuz = [];
 let inputs = [];
-let layer, layer2; //clayer;
+// let rand1 = ["The bird flies sideways", "Cereal, no spoons", "Springing out of the ground"];
+// let rand2 = ["The bird flies from the branches", "Milk is poured onto the floor", "Have your worm and eat it too"];
+// let rand3 = ["Dogs wearing tight pants", "Eat it up like a vacuum", "Jump for joy, ya goof"];
+let layer;
 let loadScripts = [
-	"scripts/syllable.min.js"
+	"data/scripts/syllable.min.js"
 ];
-let capture;
-let myCapture;
-let gfx;
+//let capture;
+//let myCapture;
+//let gfx;
+
 
 var credits = { 
     "names" : [ 
         "aubrey.pohl" 
-        ,"zubin.lakra" 
+        ,"zubin.larka"
     ] 
     ,"class" : "MDes" 
-    ,"description" : "Haiku you do, you do the haiku! Remember, a haiku is structred by 1st line: 5 syllables, 2nd line: 7 syllables, 3rd line: 5 syllables. If a bar is flashing behind your text, you need to add or subtract syllables! Use your voice or play music to manipulate the type. Enjoy :)"
+    ,"description" : "Haiku you do, you do the haiku! Remember, a haiku is structred by 1st line: 5 syllables, 2nd line: 7 syllables, 3rd line: 5 syllables. If text is red, you need to add or subtract syllables! Use your voice or play music to manipulate the type. Enjoy :)"
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 function preload() {
-	font = loadFont("fonts/RobotoCondensed-Bold.ttf");
-
-	img = loadImage('https://i.imgur.com/HX8M1ZI.png');
-}
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-function initCaptureDevice() {
-	try {
-		myCapture = createCapture(VIDEO);
-		myCapture.size(320, 240);
-		myCapture.hide();
-		console.log(
-			'[initCaptureDevice] capture ready. Resolution: ' +
-			myCapture.width + ' ' + myCapture.height
-		);
-	} catch (_err) {
-		console.log('[initCaptureDevice] capture error: ' + _err);
-	}
+	font = loadFont("data/fonts/RobotoCondensed-Bold.ttf");
 }
 
 
@@ -94,16 +77,11 @@ function initCaptureDevice() {
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 	background(0);
-	layer = createGraphics(windowWidth, windowHeight);
-	layer2 = createGraphics(650, 650);
-	// clayer = createGraphics(windowWidth, windowHeight);
+	layer = createGraphics(width/1.4, height/1.2);
 
-	initCaptureDevice(); // and access to the camera
-	gfx = createGraphics(650, 650);
-	gfx.pixelDensity(0.01);
+	//initCaptureDevice(); // and access to the camera
 	noStroke();
 	fill(255);
-	frameRate(10);
 
 	setupAudio();
 	rectMode(CENTER);
@@ -120,38 +98,45 @@ function setup() {
 
 
 function lablz(){
+	
+	let oDiv = createDiv('background color');
+	oDiv.position(width/50, height/1.9);
+	oDiv.style('font-size', '12px')
+	oDiv.style('color', '#ffffff');
+	oDiv.style('font-family', "RobotoCondensed-Bold");
+	
 	let lDiv = createDiv('background opacity');
-	lDiv.position(width/20, height/1.6);
+	lDiv.position(width/50, height/1.57);
 	lDiv.style('font-size', '12px')
 	lDiv.style('color', '#ffffff');
 	lDiv.style('font-family', "RobotoCondensed-Bold");
 	
 	let mDiv = createDiv('text color');
-	mDiv.position(width/20, height/1.37);
+	mDiv.position(width/50, height/1.35);
 	mDiv.style('font-size', '12px')
 	mDiv.style('color', '#ffffff');
 	mDiv.style('font-family', "RobotoCondensed-Bold");
 	
 	let tDiv = createDiv('HAIKU U DO!');
-	tDiv.position(width/20, height/20);
+	tDiv.position(width/50, height/20);
 	tDiv.style('font-size', '24');
 	tDiv.style('color', '#ffffff');
 	tDiv.style('font-family', "RobotoCondensed-Bold");
 	
 	let fDiv = createDiv('5 syl');
-	fDiv.position(width/5, height/7);
+	fDiv.position(width/6, height/7);
 	fDiv.style('font-size', '12');
 	fDiv.style('color', '#ffffff');
 	fDiv.style('font-family', "RobotoCondensed-Bold");
 	
 	let sDiv = createDiv('7 syl');
-	sDiv.position(width/5, height/5.5);
+	sDiv.position(width/6, height/5.5);
 	sDiv.style('font-size', '12');
 	sDiv.style('color', '#ffffff');
 	sDiv.style('font-family', "RobotoCondensed-Bold");
 	
 	let rDiv = createDiv('5 syl');
-	rDiv.position(width/5, height/4.5);
+	rDiv.position(width/6, height/4.5);
 	rDiv.style('font-size', '12');
 	rDiv.style('color', '#ffffff');
 	rDiv.style('font-family', "RobotoCondensed-Bold");
@@ -161,13 +146,12 @@ function lablz(){
 
 
 
-// should be toolName - not your actual tool name...
+
 function saveFrame(toolName){ 
     let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
     //let filename = haiku-u-du + '_' + timestamp + '.png'; 
     filename = toolName + '.png'; // uncomment to remove timestamp from name 
-    let c = get(width/3.6, height/20, 645, 645);
-	c.save(filename); // needed to be c.save not c(save)
+	save('layer'); 
 } 
 
 
@@ -178,27 +162,29 @@ function sliderFunc() {
 
 	// sliders
 
-	sliderBkdOp = createSlider(0, 100, 50);
-	sliderBkdOp.position(width / 20, height / 1.5);
+	sliderBkd = createSlider(0, 100, 50);
+	sliderBkd.position(width / 50, height / 1.5);
 	
-	sliderCol = createSlider(0, 255, 255);
-	sliderCol.position(width / 20, height / 1.3);
+	sliderCol = createSlider(0, 255,255);
+	sliderCol.position(width / 50, height / 1.3);
+	
+	sliderBkdCol = createSlider(0, 255, 0);
+	sliderBkdCol.position(width/50, height / 1.8)
 
-	filterSel = createSelect();
-	filterSel.position(width / 8, height / 2);
-	filterSel.option(GRAY);
-	filterSel.option(POSTERIZE);
-	filterSel.option(INVERT);
-	filterSel.style('background-color', '#000000');
-	filterSel.style('color', '#ffffff',)
+	// filterSel = createSelect();
+	// filterSel.position(width / 8, height / 2);
+	// filterSel.option(GRAY);
+	// filterSel.option(POSTERIZE);
+	// filterSel.option(INVERT);
+	// filterSel.style('background-color', '#000000');
+	// filterSel.style('color', '#ffffff',)
 
 	filterType = createSelect();
-	filterType.position(width / 20, height / 2);
-	filterType.option('points');
-	filterType.option('vertex');
-	filterType.option('fill');
-	filterType.option('morph');
-	filterType.option('probe');
+	filterType.position(width / 50, height / 2.5);
+	filterType.option('wiggle');
+	filterType.option('grow');
+	filterType.option('ripple');
+	filterType.option('magnify');
 	filterType.style('background-color', '#000000');
 	filterType.style('color', '#ffffff');
 
@@ -209,24 +195,24 @@ function sliderFunc() {
 
 function classSet() {
 
-	//new TypePoints(text x, text y, ext, input y, syllable count, syl indicador y);
+	//new TypePoints(text x, text y, text, input y, syllable count, syl indicador y);
 	// for(let tp of typepoints) {
 	// 	tp.genType();
 	// }
 
 
-	typepoints.push(new TypePoints(width / 3.5, height / 4.1, "hi, haiku you do?", height / 7, 5, height / 4.4));
-	typepoints.push(new TypePoints(width / 3.5, height / 2.02, "you do the haiku, wooo!", height / 5.5, 7, height / 2.1));
-	typepoints.push(new TypePoints(width / 3.5, height / 1.36, "in a haiku mood", height / 4.52, 5, height / 1.4));
+	typepoints.push(new TypePoints(layer.width / 20, layer.height / 5, "hi, haiku you do?", height / 7, 5, height / 4.4));
+	typepoints.push(new TypePoints(layer.width / 20, layer.height / 2.3, "you do the haiku, wooo!", height / 5.5, 7, height / 2.1));
+	typepoints.push(new TypePoints(layer.width / 20, layer.height / 1.45, "in a haiku mood", height / 4.52, 5, height / 1.4));
 
 
-	haikuz.push(new HaikuForms(height / 4, height / 5 + ampEase));
-	haikuz.push(new HaikuForms(height / 2, height / 2 + ampEase));
-	haikuz.push(new HaikuForms(height / 1.35, height / 5 + ampEase));
+	haikuz.push(new HaikuForms(layer.height / 5, height / 5 + ampEase));
+	haikuz.push(new HaikuForms(layer.height / 2.3, height / 2 + ampEase));
+	haikuz.push(new HaikuForms(layer.height / 1.45, height / 5 + ampEase));
 	
 	for(let i = 0; i< typepoints.length; i++){
 		inputs.push(createInput(typepoints[i].txt));
-		inputs[i].position(width / 20, typepoints[i].y2);
+		inputs[i].position(width / 50, typepoints[i].y2);
 		// this.inputL = createInput(this.txt);
 		// this.inputL.position(width / 1.23, this.y2);
 		inputs[i].size(200, 15);
@@ -241,70 +227,55 @@ function classSet() {
 
 
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
 function checkBoox() {
 
 
 	txtPtsChk = createCheckbox('show text', true);
-	txtPtsChk.position(width / 20, height / 3.5);
+	txtPtsChk.position(width / 50, height / 3.5);
 	txtPtsChk.style('color', '#ffffff');
 	txtPtsChk.style('font-family', "RobotoCondensed-Bold");
 
 	waveFrmChk = createCheckbox('show audio waves', false);
-	waveFrmChk.position(width / 20, height / 3.1);
+	waveFrmChk.position(width / 50, height / 3.1);
 	waveFrmChk.style('color', '#ffffff');
 	waveFrmChk.style('font-family', "RobotoCondensed-Bold");
 
 	waveColChk = createCheckbox('audio wave color', false);
-	waveColChk.position(width / 20, height / 2.8);
+	waveColChk.position(width / 50, height / 2.8);
 	waveColChk.style('color', '#ffffff');
 	waveColChk.style('font-family', "RobotoCondensed-Bold");
 
-	videoChk = createCheckbox('video', false);
-	videoChk.position(width / 20, height / 2.53);
-	videoChk.style('color', '#ffffff');
-	videoChk.style('font-family', "RobotoCondensed-Bold");
+	// videoChk = createCheckbox('video', false);
+	// videoChk.position(width / 20, height / 2.53);
+	// videoChk.style('color', '#ffffff');
+	// videoChk.style('font-family', "RobotoCondensed-Bold");
 	
 	// clearChk = createButton('clear!');
 	// clearChk.position(width / 20, height / 1.6);
 	// clearChk.mousePressed(clearButt());
 	// // clearChk.style();
+	
+	// Ra = createButton('Ra');
+	// Ra.position(width/7, height/10);
+	// //Ra.mousePressed();
+	// Ra.style('background-color', '#000000');
+	// Ra.style('color', '#ffffff');
 
 
 }
-
-
-
 
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// function keyPressed() {
-// 	if(key == 'S') {
-// 		let c = get(width/3.6, height/20, 645, 645);
-// 		save(c);
-// 	 }
+// function keyPressed(){
+// 	if(key == 'S'){
+// 		save(layer, 'haiku_u_did.png')
+// 	}
 // }
-
-
-function videoCap() {
-
-	let sel = filterSel.value();
-
-	if(videoChk.checked()) {
-		image(gfx, width / 3.65, height / 20);
-	}
-
-	if(myCapture !== null && myCapture !== undefined) { // safety first
-
-		gfx.image(myCapture, 0, 0, gfx.width, gfx.height);
-
-		gfx.filter(sel, 2);
-	}
-
-
-}
 
 
 
@@ -329,18 +300,47 @@ function showPoints() {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////
+function layerZ(){
+	
+	bkdCol = sliderBkdCol.value()
+	bkd = sliderBkd.value();
+	layer.background(bkdCol, bkd)
+	
+	
+	//videoCap()
+	
+	imageMode(CENTER)
+	image(layer, width/1.65, height/2)
+	
+	let filt = filterType.value();
+	let x2 = mouseX-width/4.02;
+	let y2 = mouseY-height/12;
+	
+	if(filt == "magnify"){
+		push()
+		layer.copy(x2, y2, 100, 100, x2+amp, y2+amp, 100+amp, 100+amp);
+		pop()
+	}
+	
+	
+	//layer.ellipse(mouseX-width/4.02, mouseY-height/12, 50)
+	
+
+}
+
+
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 function draw() {
 	/* audio vars: amp, ampEase, fft, waveform */
-	bkdOp = sliderBkdOp.value();
-	background(0, bkdOp);
+	background(0);
 	noFill();
 
 	updateAudio();
-	videoCap();
+	//videoCap();
 	showPoints();
 	layerZ();
 	//lablz();
@@ -350,52 +350,15 @@ function draw() {
 		hk.display();
 	}
 	
+	push()
+	stroke(255)
+	strokeWeight(5)
+	rect(width/1.65, height/2, width/1.4, height/1.2, 5)
+	pop()
+	
+	
 }
 
-
-
-
-function layerZ() {
-
-	push();
-	layer.stroke(255);
-	layer.strokeWeight(0.5);
-	layer.noFill();
-	layer.rect(width / 3.65, height / 20, 650, 650);
-	pop();
-
-	//print(fft)
-	image(layer, 0, 0);
-
-
-	if(amp <= 0) {
-		//sliderBkdOp.value(70);
-		image(layer2, width / 3.65, height / 20);
-	}
-
-	push();
-	//layer2.background(0);
-	layer2.fill(255);
-	layer2.imageMode(CENTER);
-	layer2.image(img, mouseX - 400, mouseY);
-	layer2.textAlign(CENTER);
-	layer2.textSize(70);
-	layer2.text('IS YOUR MIC ON?', width / 4.3, height / 2);
-	pop();
-	
-	// image(clayer, 0, 0);
-	
-	// push();
-	// clayer.background(0, 100);
-	// clayer.noFill();
-	// clayer.stroke(255);
-	// clayer.strokeWeight(1);
-	// clayer.ellipse(mouseX, mouseY, 50);
-	// clayer.stroke(0);
-	// clayer.strokeWeight(1);
-	// clayer.ellipse(mouseX, mouseY, 51);
-	// pop();
-}
 
 
 
@@ -432,143 +395,99 @@ class TypePoints {
 
 		//let  inp = this.inputL.value();
 		//textToPoints(txt, x, y, size, options)
-		this.points = font.textToPoints(this.txt, this.x, this.y, 55, {
+		this.points = font.textToPoints(this.txt, this.x, this.y, 70, {
 			sampleFactor: .35,
 			simplifyThreshold: 0
 		});
 		//print(points.length);
 
-		this.bounds = font.textBounds(this.txt, this.x, this.y, 55);
+		this.bounds = font.textBounds(this.txt, this.x, this.y, 70);
 	}
 
 	display() {
 
 		noFill();
-		stroke(sliderCol.value());
+		layer.stroke(sliderCol.value());
+		layer.strokeWeight(3)
 		let filt = filterType.value();
 
 		this.inp = this.txt;
 		if(syllable(this.inp) != this.syl) {
-
-			fill(random(255), random(255), random(255));
-			rect(width / 2, this.y3, 650, 50);
+			layer.stroke(255, 50, 50);
 		}
+		
+		//trying to autosave the input values into an array or library once they correct amount of syllables is reached.
+		
+		// 	if(syllable(this.inp) = this.syl){
+		// 		linez.push(this.txt);
+		// }
+		
+		let x2 = mouseX-width/4.02;
+		let y2 = mouseY-height/12;
 
 
-		beginShape();
-
-		for(let i = 0; i < this.points.length; i++) {
-			let p = this.points[i];
-			if(dist(mouseX, mouseY, p.x, p.y) < 40) {
-
-				p.x = p.x + cos(ampEase * .1 + i * amp);
-				p.y = p.y + sin(ampEase * .1 + i * amp);
-
-			}
-			point(p.x, p.y);
-		}
-		endShape();
-
-
-		if(filt == "points") {
-			beginShape();
+		if(filt == "wiggle") {
+			layer.beginShape();
 
 			for(let i = 0; i < this.points.length; i++) {
 				let p = this.points[i];
-				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
+				if(dist(x2, y2, p.x, p.y) < 30) {
+					sliderBkd.value(25)
+					p.x = p.x + cos(ampEase * .1 + i * amp);
+					p.y = p.y + sin(ampEase * .1 + i * amp);
+
+				}
+				layer.point(p.x, p.y);
+			}
+			layer.endShape(CLOSE);
+		}
+		
+		if(filt == "grow") {
+			layer.beginShape();
+			layer.noFill()
+			for(let i = 0; i < this.points.length; i++) {
+				let p = this.points[i];
+				if(dist(x2, y2, p.x, p.y) < 40) {
 					
-					//sliderBkdOp.value(50);
-					
-					p.x = p.x + cos(ampEase * .1 + i * amp) * 3;
-					p.y = p.y + sin(ampEase * .1 + i * amp) * 3;
+					sliderBkd.value(25)
+					p.x = p.x + cos(random(0, 2) + i + amp);
+					p.y = p.y + sin(random(0, 2) + i + amp);
 
 				}
-				point(p.x, p.y);
+				layer.vertex(p.x, p.y);
 			}
-			endShape();
+			layer.endShape();
 		}
-
-		if(filt == "vertex") {
-			beginShape();
-
+		
+		if(filt == "ripple") {
+			layer.beginShape();
 
 			for(let i = 0; i < this.points.length; i++) {
 				let p = this.points[i];
-				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
-					
-					push();
-					sliderBkdOp.value(50);
-					p.x = p.x + sin(ampEase / 5);
-					p.y = p.y / sin(ampEase / 10);
-					pop();
-
+				if(dist(x2, y2, p.x, p.y) < 5) {
+					sliderBkd.value(2)
+					layer.noFill()
+					layer.strokeWeight(1)
+					layer.ellipse(p.x, p.y, 1*amp*20);
 				}
-				vertex(p.x, p.y);
+				layer.strokeWeight(1)
+				layer.point(p.x, p.y);
 			}
-			endShape();
+			layer.endShape();
 		}
-
-		if(filt == "fill") {
-			push();
-			beginShape();
-			fill(sliderCol.value());
-
-
+		
+		
+		if(filt == "magnify") {
+			layer.beginShape();
 			for(let i = 0; i < this.points.length; i++) {
 				let p = this.points[i];
-				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
-					
-					push();
-					sliderBkdOp.value(50);
-					p.x = p.x - sin(ampEase);
-					p.y = p.y + ampEase / 5;
-					pop();
-
-				}
-				vertex(p.x, p.y);
+				layer.point(p.x, p.y);
 			}
-			endShape();
-			pop();
+			layer.endShape(CLOSE);
 		}
-		if(filt == "morph") {
-
-			beginShape();
-
-
-			for(let i = 0; i < this.points.length; i++) {
-				let p = this.points[i];
-				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
-
-					push();
-					sliderBkdOp.value(0);
-					p.x = p.x + sin(ampEase);
-					p.y = p.y + cos(ampEase);
-					ellipse(p.x, p.y, 5 + ampEase / 5);
-					pop();
-
-				}
-			}
-			endShape();
-		}
-		if(filt == "probe") {
-			for(let i = 0; i < this.points.length; i++) {
-				let p = this.points[i];
-				if(dist(mouseX, mouseY, p.x, p.y) < 40) {
-					push();
-					sliderBkdOp.value(100);
-					//translate(p.x2, p.y*2);
-					//translate(p.x2, p.y);
-					translate(mouseX, mouseY);
-					rotate(radians(sin(amp * i * amp) * 180));
-					let w = (p.x + amp, p.y + amp) / 5;
-					line(p.x, p.y, w, w);
-					pop();
-				}
-			}
-		}
-
-
+		
 	}
+	
 }
 
 
@@ -584,36 +503,30 @@ class HaikuForms {
 	}
 
 	display() {
-		stroke(255);
-		strokeWeight(.2);
+		push()
+		layer.stroke(sliderCol.value());
+		layer.strokeWeight(.5);
+		
 		if(waveFrmChk.checked()) {
-
 			for(let hk of haikuz) {
 				hk.haikuForms1();
 			}
 		}
 		if(waveColChk.checked()) {
-			fill(random(255), random(255), random(255));
+			layer.fill(random(255), random(255), random(255));
 		}
+		pop()
 	}
 
 	haikuForms1() {
 
-		beginShape();
+		layer.beginShape();
 		for(let i = 0; i < waveform.length; i++) {
 			let line1Freq = waveform[i] * this.size;
-			let x = map(i, 0, waveform.length, 0, width);
-			curveVertex(x, this.y + line1Freq);
-			//let count = 100;
-			// for(let i = 0; i < count; i++) {
-			// 	let x = map(i, width/2, count, 0, width/2);
-			// 	let waveSel = waveform[floor(map(i, 0, count, 0, waveform.length))];
-			// 	let fftSel = -fft[floor(map(i, 0, count, 0, fft.length))];
-			// 	ellipse(x, this.y + line1Freq);
-			// }
-			// pop();
+			let x = map(i, 0, waveform.length, 0, layer.width);
+			layer.curveVertex(x, this.y + line1Freq);
 		}
-		endShape();
+		layer.endShape();
 
 	}
 }
