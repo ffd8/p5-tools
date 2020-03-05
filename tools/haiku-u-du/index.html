@@ -149,9 +149,10 @@ function lablz(){
 
 function saveFrame(toolName){ 
     let timestamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3); 
-    //let filename = haiku-u-du + '_' + timestamp + '.png'; 
-    filename = toolName + '.png'; // uncomment to remove timestamp from name 
-	save('layer'); 
+    let filename = 'haiku-u-did_' + timestamp + '.png'; 
+    //filename = toolName + '.png'; // uncomment to remove timestamp from name 
+	layer.save(filename); //alternate save option below
+    //save(layer, 'haiku-u-did.png');
 } 
 
 
